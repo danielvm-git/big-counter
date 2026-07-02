@@ -108,6 +108,21 @@ When using the provider comparison functionality, reports include:
   - Processing time comparison
   - Component breakdown averages
 
+## CI
+
+Workflows live in `.github/workflows/`. CI runs on push/PR to `main`:
+- Python 3.10 + 3.12 matrix
+- black --check, isort --check-only, mypy src/ (advisory), pytest
+
+| Failure | Cause | Fix |
+|---------|-------|-----|
+| `black` fails | Unformatted code | `black .` locally before pushing |
+| `isort` fails | Import order wrong | `isort .` locally before pushing |
+| `mypy` shows errors | 24 pre-existing upstream issues (BUG-3, BUG-4) | Advisory only: `\|\| true` in workflow |
+| `pytest` fails | Test regression | Run `pytest tests/unit/` locally |
+| `act` not found | Docker not running or act not installed | `brew install act && docker ps` |
+| ModuleNotFoundError | Missing `src/` on PYTHONPATH | CI uses `pytest` which reads `conftest.py` adding `src/` |
+
 ## Observability
 
 | What | Command |
