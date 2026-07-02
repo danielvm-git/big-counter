@@ -15,12 +15,11 @@ repos:
   - repo: local
     hooks:
       - id: mypy
-        name: mypy (advisory — 27 pre-existing upstream errors)
-        entry: bash -c 'venv/bin/mypy src/ || true'
+        name: mypy
+        entry: venv/bin/mypy src/
         language: system
         pass_filenames: false
         types: [python]
-        verbose: true
 
       - id: pytest
         name: pytest
