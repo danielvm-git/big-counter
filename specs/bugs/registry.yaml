@@ -77,31 +77,56 @@ bugs:
   - id: BUG-7
     title: "tests/test_bcp_calculator.py — script-style test at tests/ root; requires live API keys"
     severity: Low
-    file: tests/test_bcp_calculator.py
-    status: Open
+    file: scripts/stability_test.py
+    status: Fixed
     upstream: true
     discovered: 2026-07-02
+    fixed: 2026-07-02
+    files_changed:
+      - scripts/stability_test.py
+    approach: "Moved from tests/ to scripts/"
+    risk_level: Low
+    commit_message: "fix: resolve BUG-7, BUG-8, BUG-9, BUG-10"
 
   - id: BUG-8
     title: "tests/compare_providers.py — script-style comparison tool at tests/ root; requires live API keys"
     severity: Low
-    file: tests/compare_providers.py
-    status: Open
+    file: scripts/compare_providers.py
+    status: Fixed
     upstream: true
     discovered: 2026-07-02
+    fixed: 2026-07-02
+    files_changed:
+      - scripts/compare_providers.py
+      - run_comparison.py
+    approach: "Moved from tests/ to scripts/; updated run_comparison.py path"
+    risk_level: Low
+    commit_message: "fix: resolve BUG-7, BUG-8, BUG-9, BUG-10"
 
   - id: BUG-9
     title: "run_mcp_http_server.py — duplicate calculate_bcp function definitions (dead code)"
     severity: Low
     file: run_mcp_http_server.py
-    status: Open
+    status: Fixed
     upstream: true
     discovered: 2026-07-02
+    fixed: 2026-07-02
+    files_changed:
+      - run_mcp_http_server.py
+    approach: "Removed unused build_server() function"
+    risk_level: Low
+    commit_message: "fix: resolve BUG-7, BUG-8, BUG-9, BUG-10"
 
   - id: BUG-10
     title: "src/bcp/prompt_handler.py — 23% uncovered (error paths in prompt loading + JSON parsing)"
     severity: Low
     file: src/bcp/prompt_handler.py
-    status: Open
+    status: Fixed
     upstream: true
     discovered: 2026-07-02
+    fixed: 2026-07-02
+    files_changed:
+      - tests/unit/test_prompt_handler.py
+    approach: "Added 3 tests for uncovered error paths (FileNotFound, syntax error, malformed JSON)"
+    risk_level: Low
+    commit_message: "fix: resolve BUG-7, BUG-8, BUG-9, BUG-10"
