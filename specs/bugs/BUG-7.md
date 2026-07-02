@@ -29,4 +29,9 @@ Option A is minimal — just rename and move. The functionality (multi-run stabi
 
 ## Resolution
 
-<!-- filled in by validate-fix -->
+**Fixed:** 2026-07-02
+**Root cause confirmed:** Script-style stability testing utility lived at `tests/test_bcp_calculator.py`, misleading pytest (collects 0 tests) and requiring live API keys.
+**Fix applied:** Moved to `scripts/stability_test.py` — clear separation from test suite.
+**Hardening added:** None needed — file relocation is self-documenting.
+**Evidence:** `pytest tests/` collects 17 tests (no script interference).
+**Commit:** `refactor(tests): move stability test script from tests/ to scripts/`
