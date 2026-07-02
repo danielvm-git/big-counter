@@ -18,6 +18,14 @@ bugs:
     title: "tests/test_sdk.py — requires live API credentials (not self-contained)"
     severity: Low
     file: tests/test_sdk.py
-    status: Open
+    status: Fixed
     upstream: true
     discovered: 2026-07-02
+    fixed: 2026-07-02
+    files_changed:
+      - tests/test_sdk.py
+      - tests/conftest.py
+      - tests/unit/test_bcp_calculator.py
+    approach: "Inject FakePromptHandler instead of live FlowProvider; extract shared test double to conftest.py"
+    risk_level: Low
+    commit_message: "fix(tests): make test_sdk.py self-contained with FakePromptHandler"
