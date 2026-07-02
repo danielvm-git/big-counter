@@ -1,0 +1,23 @@
+bugs:
+  - id: BUG-1
+    title: "tests/test_providers.py — broken module import path"
+    severity: Medium
+    file: tests/test_providers.py
+    status: Fixed
+    upstream: true
+    discovered: 2026-07-02
+    fixed: 2026-07-02
+    files_changed:
+      - tests/test_providers.py
+      - tests/unit/test_guard_bare_imports.py
+    approach: "Qualify bare imports with bcp namespace + add AST guard test"
+    risk_level: Low
+    commit_message: "fix(tests): qualify bare imports in test_providers.py with bcp namespace"
+
+  - id: BUG-2
+    title: "tests/test_sdk.py — requires live API credentials (not self-contained)"
+    severity: Low
+    file: tests/test_sdk.py
+    status: Open
+    upstream: true
+    discovered: 2026-07-02
