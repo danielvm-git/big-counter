@@ -5,7 +5,7 @@ This package provides tools for calculating Business Complexity Points
 for user stories using various LLM providers.
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 from .bcp_calculator import BCPCalculator
 from .llm_providers import ClaudeProvider, LLMProvider, OpenAIProvider, get_provider
