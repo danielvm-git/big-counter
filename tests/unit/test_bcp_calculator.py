@@ -107,6 +107,40 @@ def test_bcp_missing_elements_defaults(logger):
     assert result["breakdown"]["External Integrations"] == 1
 
 
+def test_bcp_zero_bcp_logs_warning(logger):
+    """When a required step returns 0 BCP, it logs a warning but doesn't crash."""
+    responses = {
+        "step3_flow_bcp_break_elements.jinja2": {
+            "Integrations (Boundaries)": [{"Boundary": "DB", "Size": "XS"}],
+            "User View": "test",
+            "Acceptance Criteria": [],
+            "Test Plan": {},
+            "Business Narrative": "",
+            "Requirements and Business Rules": "",
+        },
+        "step4_flow_bcp_boundaries.jinja2": [],  # Empty list → 0 BCP
+        "step5_flow_bcp_interface_elements.jinja2": {"Static": 0, "Dynamic": 0},
+        "step6_flow_bcp_business_rule.jinja2": [],
+    }
+    fake = FakePromptHandler(responses)
+    calc = BCPCalculator(logger=logger, prompt_handler=fake)
+    story = "A\nB"
+    result = calc.calculate_bcp(story)
+    # No breakdown entries with 0 BCP
+    assert result["total_bcp"] == 0
+
+
+def test_extract_section_legacy(logger):
+    """Legacy _extract_section splits on <--> delimiter."""
+    calc = BCPCalculator(logger=logger, prompt_handler=FakePromptHandler({}))
+    text = "section1\n<-->\nsection2\n<-->\nsection3"
+    assert calc._extract_section(text, 1) == "section1"
+    assert calc._extract_section(text, 2) == "section2"
+    assert calc._extract_section(text, 3) == "section3"
+    # Out of range returns empty string
+    assert calc._extract_section(text, 99) == ""
+
+
 def test_bcp_required_step_error_halts(logger):
     class ErrorPromptHandler(FakePromptHandler):
         def process_prompt(self, prompt_file, variables):

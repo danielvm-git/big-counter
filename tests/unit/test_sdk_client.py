@@ -77,3 +77,45 @@ class TestCalculate:
         assert "claude" in results
         assert results["openai"]["total_bcp"] == 5
         assert results["claude"]["total_bcp"] == 5
+
+    def test_compare_providers_handles_failure(self, client, monkeypatch):
+        """When one provider fails, the error is recorded not propagated."""
+
+        class FailingCalc:
+            def __init__(self, logger, provider_name="openai", prompt_handler=None):
+                pass
+
+            def calculate_bcp(self, story_content):
+                raise RuntimeError("API error")
+
+        monkeypatch.setattr("src.sdk.client.BCPCalculator", FailingCalc)
+        results = client.compare_providers("Story\nbody", providers=["openai"])
+        assert "error" in results["openai"]
+        assert "API error" in results["openai"]["error"]
+
+    def test_batch_calculate_survives_file_error(self, client, monkeypatch, tmp_path):
+        """When one file fails, other files still complete."""
+        (tmp_path / "good.md").write_text("Good\nbody")
+        (tmp_path / "bad.md").write_text("Bad\nbody")
+
+        # Force the first file processed to fail by tracking call count
+        failing_file = [None]
+        orig_calc = client.calculator.calculate_bcp
+
+        def flaky_calc(content):
+            result = orig_calc(content)
+            name = result["story_name"]
+            if failing_file[0] is None:
+                failing_file[0] = name
+                raise RuntimeError("parse error")
+            return result
+
+        monkeypatch.setattr(client.calculator, "calculate_bcp", flaky_calc)
+        results = client.batch_calculate(str(tmp_path))
+        # Both files appear in results
+        assert "good.md" in results
+        assert "bad.md" in results
+        # The first one processed has error
+        failed_name = failing_file[0]
+        matching_key = "good.md" if failed_name == "Good" else "bad.md"
+        assert "error" in results[matching_key]

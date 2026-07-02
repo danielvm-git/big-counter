@@ -75,3 +75,31 @@ class TestReadStoryFile:
         logger = setup_logger(logging.DEBUG)
         with pytest.raises(SystemExit):
             read_story_file(str(tmp_path / "nope.md"), logger)
+
+
+class TestSaveOrPrintResults:
+    def test_saves_to_file(self, tmp_path):
+        from src.main import save_or_print_results
+
+        results = {
+            "story_name": "Test",
+            "total_bcp": 5,
+            "breakdown": {"Business Rules": 5},
+            "steps": {},
+        }
+        output_file = tmp_path / "output.json"
+        logger = setup_logger(logging.DEBUG)
+        save_or_print_results(results, "json", str(output_file), logger)
+        assert output_file.exists()
+        assert "Test" in output_file.read_text()
+
+    def test_calculate_bcp_error_exits(self, monkeypatch):
+        from src import main as main_module
+
+        def failing_calc(logger, provider_name="openai", prompt_handler=None):
+            raise RuntimeError("LLM down")
+
+        monkeypatch.setattr(main_module, "BCPCalculator", failing_calc)
+        logger = setup_logger(logging.DEBUG)
+        with pytest.raises(SystemExit):
+            main_module.calculate_bcp_for_story("story", "openai", logger)

@@ -1,0 +1,24 @@
+# Core dependencies - Exact versions (tested and working)
+# Updated: 2025-10-30 - Compatible with langchain 1.0.x
+langchain==1.0.3
+langchain-core==1.0.2
+langchain-openai==1.0.1
+langchain-anthropic==1.0.0
+openai==2.3.0
+anthropic==0.72.0
+jinja2==3.1.6
+python-dotenv==1.1.0
+
+# API dependencies
+fastapi==0.115.14
+uvicorn==0.38.0
+pydantic==2.11.7
+requests==2.32.3
+
+# Analysis and visualization dependencies
+pandas==2.2.3
+matplotlib==3.9.4
+openpyxl==3.1.5
+
+# MCP server support
+mcp[cli]
