@@ -34,17 +34,29 @@ bugs:
     title: "src/bcp/llm_providers.py — 14 mypy errors (LangChain BaseChatModel subclass signature mismatches + missing annotations)"
     severity: Medium
     file: src/bcp/llm_providers.py
-    status: Open
+    status: Fixed
     upstream: true
     discovered: 2026-07-02
+    fixed: 2026-07-02
+    files_changed:
+      - src/bcp/llm_providers.py
+    approach: "LangChain v1 compat: @property _llm_type, run_manager param, ChatAnthropic kwargs, type annotations"
+    risk_level: Medium
+    commit_message: "fix(types): resolve BUG-3 — LangChain v1 signature mismatches"
 
   - id: BUG-4
     title: "src/bcp/bcp_calculator.py — 10 mypy errors (untyped response variable cascade)"
     severity: Medium
     file: src/bcp/bcp_calculator.py
-    status: Open
+    status: Fixed
     upstream: true
     discovered: 2026-07-02
+    fixed: 2026-07-02
+    files_changed:
+      - src/bcp/bcp_calculator.py
+    approach: "Add StepDef TypedDict + type annotations for response, variables, results"
+    risk_level: Low
+    commit_message: "fix(types): resolve BUG-4 — add TypedDict and type annotations"
 
   - id: BUG-5
     title: "src/main.py — 2 mypy errors (implicit Optional in function parameters)"

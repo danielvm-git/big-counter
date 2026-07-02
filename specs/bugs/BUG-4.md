@@ -41,4 +41,9 @@ class StepDef(TypedDict):
 
 ## Resolution
 
-<!-- filled in by validate-fix -->
+**Fixed:** 2026-07-02
+**Root cause confirmed:** Two missing type annotations cascaded 10 errors: (1) `self.steps` list of untyped dicts → `step["name"]` inferred as `object`, not `str`. (2) `response = {}` untyped → downstream arithmetic on `object`.
+**Fix applied:** Added `StepDef(TypedDict)` for step definitions, typed `self.steps: list[StepDef]`, annotated `response: dict[str, Any] | list[dict[str, Any]]`, and used `Any` for the heterogeneous `results` dict.
+**Hardening added:** 0 mypy errors in `bcp_calculator.py`.
+**Evidence:** 17/17 tests pass; `mypy src/bcp/bcp_calculator.py` reports 0 errors.
+**Commit:** `fix(types): resolve BUG-4 — add TypedDict and type annotations to bcp_calculator`

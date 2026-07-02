@@ -48,4 +48,9 @@ The code was written against an older LangChain version where `BaseChatModel` ha
 
 ## Resolution
 
-<!-- filled in by validate-fix -->
+**Fixed:** 2026-07-02
+**Root cause confirmed:** LangChain v1 changed `BaseChatModel` from method-based to property-based `_llm_type`, added mandatory `run_manager` parameter to `_generate`/`_stream`, and `ChatAnthropic` now requires `timeout`/`stop` kwargs.
+**Fix applied:** (1) `_llm_type` → `@property` on both `FlowChatModel` and `FlowBedrockChatModel`. (2) Added `run_manager: Any = None` to all 4 `_generate`/`_stream` overrides. (3) `FlowChatModel._generate` return type: `Dict[str, Any]` → `ChatResult`. (4) `_stream` return types: `Iterator[Any]` (not implemented). (5) `ChatAnthropic(model=...)` → `ChatAnthropic(model_name=..., timeout=None, stop=None)`. (6) Added type annotations for `message_dict` and `stop_sequences`. (7) Added `assert self.base_url is not None` guards.
+**Hardening added:** 0 mypy errors across entire codebase (was 27).
+**Evidence:** 17/17 tests pass; `mypy src/` reports 0 errors.
+**Commit:** `fix(types): resolve BUG-3 — LangChain v1 signature mismatches in llm_providers`
