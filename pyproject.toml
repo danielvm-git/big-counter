@@ -18,6 +18,18 @@ explicit_package_bases = true
 exclude = ["venv/", ".venv/"]
 ignore_missing_imports = true
 
+[tool.semantic_release]
+branches = { main = { match = "main" } }
+version_variables = [
+    "src/bcp/__init__.py:__version__",
+    "setup.py:version",
+]
+hvcs = "github"
+build_command = "pip install -e ."
+changelog_file = "CHANGELOG.md"
+changelog_mode = "init"
+commit_parser = "conventional"
+
 [tool.pytest.ini_options]
 testpaths = ["tests", "tests/unit", "tests/integration"]
 python_files = "test_*.py"
