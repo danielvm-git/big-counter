@@ -36,4 +36,9 @@ Two lines changed: add `| None` to `output_file` and `logger` types.
 
 ## Resolution
 
-<!-- filled in by validate-fix -->
+**Fixed:** 2026-07-02
+**Root cause confirmed:** `output_file` and `logger` parameters defaulted to `None` but were typed as `str` and `logging.Logger` without `| None`. PEP 484 prohibits implicit Optional.
+**Fix applied:** Changed `output_file: str = None` → `output_file: str | None = None` and `logger: logging.Logger = None` → `logger: logging.Logger | None = None`. Added `-> None` return type.
+**Hardening added:** None needed — type checker now enforces correct usage.
+**Evidence:** 0 mypy errors in `src/main.py`; 14/14 tests pass.
+**Commit:** `fix(types): add explicit Optional to save_or_print_results params`

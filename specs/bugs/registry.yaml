@@ -50,17 +50,29 @@ bugs:
     title: "src/main.py — 2 mypy errors (implicit Optional in function parameters)"
     severity: Low
     file: src/main.py
-    status: Open
+    status: Fixed
     upstream: true
     discovered: 2026-07-02
+    fixed: 2026-07-02
+    files_changed:
+      - src/main.py
+    approach: "Add explicit | None to Optional params"
+    risk_level: Low
+    commit_message: "fix(types): add explicit Optional to save_or_print_results params"
 
   - id: BUG-6
     title: "src/api/server.py — 1 mypy error (jobs dict missing type annotation)"
     severity: Low
     file: src/api/server.py
-    status: Open
+    status: Fixed
     upstream: true
     discovered: 2026-07-02
+    fixed: 2026-07-02
+    files_changed:
+      - src/api/server.py
+    approach: "Add dict type annotation for jobs"
+    risk_level: Low
+    commit_message: "fix(types): add type annotation for jobs dict in api server"
 
   - id: BUG-7
     title: "tests/test_bcp_calculator.py — script-style test at tests/ root; requires live API keys"

@@ -31,4 +31,9 @@ One line added.
 
 ## Resolution
 
-<!-- filled in by validate-fix -->
+**Fixed:** 2026-07-02
+**Root cause confirmed:** Module-level `jobs = {}` missing type annotation.
+**Fix applied:** `jobs: dict[str, dict[str, Any]] = {}`.
+**Hardening added:** None needed — type checker now enforces key/value types.
+**Evidence:** 0 mypy errors in `src/api/server.py`; 14/14 tests pass.
+**Commit:** `fix(types): add type annotation for jobs dict in api server`
