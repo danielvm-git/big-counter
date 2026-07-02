@@ -29,3 +29,67 @@ bugs:
     approach: "Inject FakePromptHandler instead of live FlowProvider; extract shared test double to conftest.py"
     risk_level: Low
     commit_message: "fix(tests): make test_sdk.py self-contained with FakePromptHandler"
+
+  - id: BUG-3
+    title: "src/bcp/llm_providers.py — 14 mypy errors (LangChain BaseChatModel subclass signature mismatches + missing annotations)"
+    severity: Medium
+    file: src/bcp/llm_providers.py
+    status: Open
+    upstream: true
+    discovered: 2026-07-02
+
+  - id: BUG-4
+    title: "src/bcp/bcp_calculator.py — 10 mypy errors (untyped response variable cascade)"
+    severity: Medium
+    file: src/bcp/bcp_calculator.py
+    status: Open
+    upstream: true
+    discovered: 2026-07-02
+
+  - id: BUG-5
+    title: "src/main.py — 2 mypy errors (implicit Optional in function parameters)"
+    severity: Low
+    file: src/main.py
+    status: Open
+    upstream: true
+    discovered: 2026-07-02
+
+  - id: BUG-6
+    title: "src/api/server.py — 1 mypy error (jobs dict missing type annotation)"
+    severity: Low
+    file: src/api/server.py
+    status: Open
+    upstream: true
+    discovered: 2026-07-02
+
+  - id: BUG-7
+    title: "tests/test_bcp_calculator.py — script-style test at tests/ root; requires live API keys"
+    severity: Low
+    file: tests/test_bcp_calculator.py
+    status: Open
+    upstream: true
+    discovered: 2026-07-02
+
+  - id: BUG-8
+    title: "tests/compare_providers.py — script-style comparison tool at tests/ root; requires live API keys"
+    severity: Low
+    file: tests/compare_providers.py
+    status: Open
+    upstream: true
+    discovered: 2026-07-02
+
+  - id: BUG-9
+    title: "run_mcp_http_server.py — duplicate calculate_bcp function definitions (dead code)"
+    severity: Low
+    file: run_mcp_http_server.py
+    status: Open
+    upstream: true
+    discovered: 2026-07-02
+
+  - id: BUG-10
+    title: "src/bcp/prompt_handler.py — 23% uncovered (error paths in prompt loading + JSON parsing)"
+    severity: Low
+    file: src/bcp/prompt_handler.py
+    status: Open
+    upstream: true
+    discovered: 2026-07-02

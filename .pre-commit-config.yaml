@@ -1,0 +1,31 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+      - id: black
+        language_version: python3
+        args: [--check]
+
+  - repo: https://github.com/pycqa/isort
+    rev: 6.0.1
+    hooks:
+      - id: isort
+        args: [--check-only, --profile, black]
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy (advisory — 27 pre-existing upstream errors)
+        entry: bash -c 'venv/bin/mypy src/ || true'
+        language: system
+        pass_filenames: false
+        types: [python]
+        verbose: true
+
+      - id: pytest
+        name: pytest
+        entry: venv/bin/python -m pytest tests/unit/ -q -o "addopts="
+        language: system
+        pass_filenames: false
+        types: [python]
+        always_run: true

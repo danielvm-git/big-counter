@@ -35,7 +35,6 @@ def test_no_bare_bcp_imports_in_tests():
                         f"→ should be `from bcp.{node.module} import`"
                     )
 
-    assert not violations, (
-        f"Found {len(violations)} bare import(s) of bcp modules:\n"
-        + "\n".join(violations)
+    assert not violations, f"Found {len(violations)} bare import(s) of bcp modules:\n" + "\n".join(
+        violations
     )
