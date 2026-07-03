@@ -1,0 +1,20 @@
+story_id: e02s02
+title: "Parse-or-raise contract + retry-then-fail semantics"
+status: todo
+bcps: 5
+tasks:
+  - id: e02s02t01
+    description: >
+      PromptHandler.process_prompt returns parsed JSON or raises
+      ResponseParseError carrying raw text; raw_response sentinel removed from
+      PromptHandler, calculator, and CLI formatters (ADR-0009).
+    verify: "! grep -rq 'raw_response' src/bcp/prompt_handler.py src/bcp/bcp_calculator.py && venv/bin/python -m pytest tests/unit/ -q"
+    status: todo
+  - id: e02s02t02
+    description: >
+      Calculator: required dimension validation failure -> re-call once -> error
+      result naming the dimension, never a partial total (ADR-0008). Non-required
+      stages annotate-and-continue without retry; failed Maturity stage forces
+      verdict low.
+    verify: "venv/bin/python -m pytest tests/unit/test_failure_semantics.py -q"
+    status: todo

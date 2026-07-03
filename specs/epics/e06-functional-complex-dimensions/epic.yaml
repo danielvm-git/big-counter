@@ -1,0 +1,14 @@
+id: e06
+slug: e06-functional-complex-dimensions
+title: Complex functional dimensions (Roles/Permissions, Variabilities)
+goal: >
+  The two dimensions requiring aspect-splitting discipline: Roles/Permissions
+  (specificity precedence vs residual Business Rules, ADR-0003) and Solution
+  Variabilities (selection-vs-transformation boundary, one element per
+  variability axis). Both were high-CV in the whitepaper (Variabilities 47.1%
+  intrinsic) — decision tables per ADR-0006 are the fix.
+adrs: ["0003", "0006"]
+depends_on: [e02]
+stories:
+  - {id: e06s01, title: "Roles/Permissions dimension with aspect-splitting fixtures", bcps: 5}
+  - {id: e06s02, title: "Solution Variabilities dimension (one element per axis)", bcps: 5}

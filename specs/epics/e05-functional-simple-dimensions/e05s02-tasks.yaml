@@ -1,0 +1,20 @@
+story_id: e05s02
+title: "Audits + Background Processes dimensions"
+status: todo
+bcps: 5
+tasks:
+  - id: e05s02t01
+    description: >
+      Audits: identity = one entity requiring audit trail, XS(1) per entity.
+      Router identity rule + Dimension Module + fixtures.
+    verify: "venv/bin/python -m pytest tests/unit/test_dimension_audits.py -q"
+    status: todo
+  - id: e05s02t02
+    description: >
+      Background Processes: identity = one distinct asynchronous process;
+      criteria-defined decision table for M(3)->XL(8) (countable facts, no
+      adjectives per ADR-0006). A background process calling an external
+      service also yields a Boundaries element via aspect splitting — fixture
+      covers this.
+    verify: "venv/bin/python -m pytest tests/unit/test_dimension_background_processes.py tests/golden/ -q"
+    status: todo

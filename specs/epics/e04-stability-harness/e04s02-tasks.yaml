@@ -1,0 +1,25 @@
+story_id: e04s02
+title: "Report + replay modes with guards and invariant checks"
+status: todo
+bcps: 5
+tasks:
+  - id: e04s02t01
+    description: >
+      Report mode: per-dimension CV of subtotal and of element count, aggregate
+      CV bucketed by maturity (Exhibit 10: reliable/moderate/low reported
+      separately), retry rate per dimension, unclassified frequency.
+    verify: "venv/bin/python -m pytest tests/unit/test_stability_report.py -q"
+    status: todo
+  - id: e04s02t02
+    description: >
+      Replay mode: re-run validate+score over recorded raw responses with a
+      candidate thresholds file, zero API calls; refuse cross-model_id and
+      cross-prompt-version replays.
+    verify: "venv/bin/python -m pytest tests/unit/test_stability_replay.py -q"
+    status: todo
+  - id: e04s02t03
+    description: >
+      Invariant auditor: every record checked for exclusive ownership, count
+      preservation, and sum integrity; violations fail loudly.
+    verify: "venv/bin/python -m pytest tests/unit/test_stability_invariants.py -q"
+    status: todo

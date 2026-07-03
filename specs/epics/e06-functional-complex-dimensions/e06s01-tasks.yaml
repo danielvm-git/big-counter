@@ -1,0 +1,20 @@
+story_id: e06s01
+title: "Roles/Permissions dimension with aspect-splitting fixtures"
+status: todo
+bcps: 5
+tasks:
+  - id: e06s01t01
+    description: >
+      Router identity rule: authorization aspects (who may do what) route here;
+      residual precedence keeps them out of Business Rules; Business Rules sizer
+      prompt updated to state it is residual (ADR-0003).
+    verify: "grep -qi 'residual' src/bcp/prompts/step6_flow_bcp_business_rule.jinja2"
+    status: todo
+  - id: e06s01t02
+    description: >
+      Roles/Permissions Dimension Module with S(2)->L(5) criteria-defined table
+      (counted facts: number of roles, permission grain). Fixture: the
+      "only admins approve refunds over $1000" sentence splits into exactly one
+      Roles element + one Business Rules element.
+    verify: "venv/bin/python -m pytest tests/unit/test_dimension_roles_permissions.py tests/golden/ -q"
+    status: todo

@@ -1,0 +1,30 @@
+story_id: e02s01
+title: "Tracer: Router stage routes the 3 existing dimensions end-to-end"
+status: todo
+bcps: 8
+slice_note: >
+  Full vertical: story -> step 3 -> Router -> 3 sizers consume ONLY routed
+  elements -> totals. Kills the Test-Plan double-feed. This is the single
+  behavior-changing commit of Phase 1.
+tasks:
+  - id: e02s01t01
+    description: >
+      Write the Router prompt (step 3.5): emits canonical elements tagged with
+      exactly one dimension from the enum, per-dimension Identity Rules inline
+      (Boundary = one distinct medium — migrated from step4), unclassified
+      bucket, aspect splitting with Business Rules as residual.
+    verify: "test -f src/bcp/prompts/step3_5_element_router.jinja2"
+    status: todo
+  - id: e02s01t02
+    description: >
+      Wire the Router stage into the pipeline; each Dimension Module's
+      build_variables receives only its routed elements; remove {{story}} from
+      the step4 boundaries prompt.
+    verify: "! grep -q '{{story}}' src/bcp/prompts/step4_flow_bcp_boundaries.jinja2 && venv/bin/python -m pytest tests/unit/ -q"
+    status: todo
+  - id: e02s01t03
+    description: >
+      Update FakePromptHandler fixtures for the routed pipeline; record expected
+      score deltas vs pre-Router totals in the story spec (ADR-0004 evidence).
+    verify: "venv/bin/python -m pytest tests/unit/ -q"
+    status: todo

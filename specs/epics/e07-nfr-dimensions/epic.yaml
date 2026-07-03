@@ -1,0 +1,14 @@
+id: e07
+slug: e07-nfr-dimensions
+title: NFR dimensions with sizer-level gate (SNAP-derived criteria)
+goal: >
+  Quality Attributes, Security & Compliance, UX & Accessibility as Dimension
+  Modules. The Router routes every distinct NFR requirement; the NFR Gate is the
+  bottom rung of each sizer's rubric (standard expectation -> 0 points with
+  rationale, CONTEXT.md). Size criteria use SNAP-style countable inputs so SNAP
+  compatibility is structural (ADR-0006, whitepaper Exhibit 5).
+adrs: ["0006", "0007"]
+depends_on: [e02]
+stories:
+  - {id: e07s01, title: "Tracer: Quality Attributes with the NFR Gate pattern", bcps: 5}
+  - {id: e07s02, title: "Security & Compliance + UX & Accessibility", bcps: 5}

@@ -1,0 +1,12 @@
+id: e03
+slug: e03-provider-config
+title: Provider configuration cleanup
+goal: >
+  ProviderConfig value object built from env once at each entry point and passed
+  explicitly; alias table centralized in the factory; os.environ mutation removed
+  from the MCP HTTP server (hidden ordering constraint + concurrency hazard).
+  Independent of Router work — may land any time.
+adrs: []
+depends_on: []
+stories:
+  - {id: e03s01, title: "ProviderConfig value object; kill env-var side channel", bcps: 3}

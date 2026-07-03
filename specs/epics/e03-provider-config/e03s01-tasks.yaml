@@ -1,0 +1,18 @@
+story_id: e03s01
+title: "ProviderConfig value object; kill env-var side channel"
+status: todo
+bcps: 3
+tasks:
+  - id: e03s01t01
+    description: >
+      ProviderConfig dataclass (provider name, model, api key, flow settings,
+      sampling params); get_provider(name, config) accepts it; alias table
+      (flow -> flow-openai) lives in the factory only.
+    verify: "venv/bin/python -m pytest tests/unit/test_providers.py -q"
+    status: todo
+  - id: e03s01t02
+    description: >
+      run_mcp_http_server builds ProviderConfig from request overrides instead
+      of mutating os.environ; SDK compare_providers passes configs explicitly.
+    verify: "! grep -q 'os.environ\\[' run_mcp_http_server.py && venv/bin/python -m pytest tests/unit/ -q"
+    status: todo

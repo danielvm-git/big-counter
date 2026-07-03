@@ -1,0 +1,188 @@
+core_value: >
+  A BCP counter that scores a story across 13 non-overlapping complexity dimensions
+  with structurally guaranteed exclusivity, repeatable enough to power team-level
+  velocity monitoring, and evolvable as a ruler without losing comparability across time.
+
+summary: >
+  BCP Plus extends the existing 3-dimension bcp-agent fork (Boundaries, Interface
+  Elements, Business Rules) into the whitepaper's full 13-dimension counter. The
+  original 3-dimension pipeline has a structural double-counting defect (the same
+  story section is fed to two independent scoring prompts) that would compound
+  across 10 new dimensions if copied as-is. This initiative closes that gap with
+  an Element Router that classifies every countable element into exactly one
+  dimension before any sizing happens, reshapes the 13 dimensions into pure,
+  independently testable Dimension Modules, and adds the provenance and stability
+  tooling required to trust the resulting numbers over time.
+
+  As whitepaper author, the project owner may redefine dimension boundaries,
+  categories, and sizes to maximize precision and repeatability, provided the
+  original BCP philosophy (universal, tech-decoupled, person-independent results),
+  NFR dimension support, and SNAP compatibility are preserved. Decisions made
+  during scoping are recorded as ADRs in specs/ADRS/ and as the domain glossary
+  in specs/CONTEXT.md; this document bounds what ships, not how.
+
+in_scope:
+  - item: Behavior-preserving refactor of the 3 existing dimensions into Dimension Modules
+    detail: >
+      Extract Boundaries/Interface Elements/Business Rules into pure modules
+      (build_variables/validate/score per ADR-0007), itemized Dimension Scores,
+      generic calculator loop, typed result model with provenance block, StepLogger
+      removed. Test-Plan double-feed deliberately kept as a control group so pinned
+      totals prove nothing moved.
+    maps_to: epic e01-dimension-module-refactor
+
+  - item: Element Router (new step 3.5) and revised failure semantics
+    detail: >
+      Single upstream classification pass giving every complexity element exactly
+      one owning dimension (ADR-0001), canonical elements via per-dimension Identity
+      Rules (ADR-0002), aspect splitting with Business Rules as residual (ADR-0003),
+      retry-then-fail on validation failure with no partial totals (ADR-0008),
+      parse-or-raise prompt contract (ADR-0009), single orchestration function with
+      Confidence Verdict computation consumed by all entry points.
+    maps_to: epic e02-element-router
+
+  - item: 10 new dimensions (functional and non-functional)
+    detail: >
+      Roles/Permissions, Solution Variabilities, Domain Entities, New Domain
+      Entities, Background Processes, Notifications, Audits, Quality Attributes,
+      Security & Compliance, UX & Accessibility — each a Dimension Module with a
+      written Identity Rule and a criteria-defined (adjective-free) decision table
+      per ADR-0006. Dims 6/7 mutually exclusive per entity; dim 4 uses the
+      selection-vs-transformation boundary; NFR dims gate via their sizer's rubric,
+      not the Router.
+    maps_to: epics e05-functional-simple-dimensions, e06-functional-complex-dimensions, e07-nfr-dimensions
+
+  - item: Provider configuration cleanup
+    detail: >
+      Explicit ProviderConfig value passed to the factory; alias table centralized;
+      os.environ mutation removed from the MCP HTTP server side channel. Independent
+      of the Router work — may land any time.
+    maps_to: epic e03-provider-config
+
+  - item: Stability harness (record / report / replay)
+    detail: >
+      run_stability.py per specs/stability-harness.md — persists a Replay Corpus of
+      raw LLM responses and per-dimension element counts, reports CV of subtotal and
+      of element count separately (routing flap vs sizing flap), replays recorded
+      responses against candidate decision-table thresholds at zero API cost
+      (ADR-0007), validates every record against the CONTEXT.md invariants.
+    maps_to: epic e04-stability-harness
+
+  - item: Result provenance and calibration policy
+    detail: >
+      Every result carries a calibration_id provenance block (ruler version, prompt
+      set, thresholds, pinned model snapshot, sampling params) per ADR-0010. Model
+      changes follow the recalibration protocol in ADR-0011. BCP numbers are
+      comparable iff calibration_id matches.
+    maps_to: epic e02-element-router
+
+  - item: Stability tuning pass across all 13 dimensions
+    detail: >
+      25-iteration protocol; tuning means adjusting decision-table thresholds first,
+      Router identity rules second, prompt prose rewrite as last resort (ADR-0006).
+      Target aggregate CV ≈ 10-15% on the `reliable` maturity bucket.
+    maps_to: epic e08-stability-tuning
+
+  - item: Whitepaper evolution document and upstream offer
+    detail: >
+      Publish the ruler changes made during this initiative (dimension boundaries,
+      identity rules, criteria-defined sizes) as a whitepaper evolution (ADR-0005),
+      and prepare a PR/extension proposal for flow-ciandt/bcp-agent.
+    maps_to: epic e09-package-and-publish
+
+out_of_scope:
+  - item: Sprint-level velocity dashboards or aggregation tooling
+    reason: >
+      Not valuable to build here — the harness measures the counter's own
+      repeatability, not team throughput. Explicitly deferred in
+      specs/stability-harness.md. A consuming team builds this on top of the
+      provenance-tagged results.
+
+  - item: Automatic model swapping or auto-recalibration
+    reason: >
+      Too risky — ADR-0011 requires a model change to run the full recalibration
+      protocol (golden corpus + stability run + published calibration_id) as a
+      deliberate, reviewed event, never an automated swap.
+
+  - item: Historical backfill or migration of pre-Router BCP scores
+    reason: >
+      Depends on an external factor (whether any consumer needs old series bridged)
+      not yet known. ADR-0004 treats pre-Router numbers as simply incomparable;
+      no migration is attempted. Revisit if a concrete consumer asks.
+
+  - item: Additional LLM providers beyond OpenAI, Claude, and Flow
+    reason: Not requested; no whitepaper or product requirement drives it. Deferred.
+
+  - item: Automated SNAP report generation/export
+    reason: >
+      Not valuable yet — in scope is SNAP *compatibility* via the Exhibit 5 mapping
+      table and SNAP-derived NFR size criteria (ADR-0006), not a SNAP report
+      exporter. Deferred until a team asks to reconcile against SNAP tooling.
+
+  - item: Prompt/UI internationalization
+    reason: Not valuable now — no multi-language requirement has surfaced. Deferred.
+
+  - item: Resolving the solo-git vs team-pr workflow contradiction and the CI mypy hard-gate discrepancy
+    reason: >
+      Pre-existing audit debt (specs/PLAN-AUDIT_LATEST.md open gaps), orthogonal to
+      BCP Plus feature scope. Tracked separately; fix opportunistically, not a
+      blocking dependency of this initiative.
+
+  - item: Transport-level resilience (timeouts, backoff, rate-limit handling) beyond validation retry
+    reason: >
+      Deferred, not out of principle — CONVENTIONS.md already mandates these
+      defensive patterns and ADR-0008 only covers validation-failure retry.
+      Real but separate work; scope into epic e02 only if Phase 1 build surfaces
+      it as a blocker, otherwise a fast-follow epic.
+
+constraints:
+  tech:
+    - Python 3.10+ (3.13 in dev venv), LangChain — existing bcp-agent fork stack, not replaced
+    - Provider abstraction (OpenAI / Claude / Flow) preserved; no provider lock-in introduced
+    - Dimension Modules must be pure (no LLM I/O) per ADR-0007 — enforced by code review, testable via replay
+  process:
+    - Minimal-change extension philosophy: the Router is additive; Step 3's existing prompt is untouched
+    - Refactor (epic e01) must be behavior-preserving and land before the Router (epic e02) — existing
+      pinned tests are the oracle; any post-Router score shift must be attributable to the double-feed
+      fix alone (sequencing decision, specs/PLAN.md Phase 1)
+    - Scoring *rules* (weights, bucketing) for the 3 original dimensions are pinned by updated unit tests;
+      real-story totals may shift once and must be explained in the Phase 1 baseline report (ADR-0004)
+  cost:
+    - Stability protocol (25 iterations x up to 14+ calls x N stories) is real API spend; deterministic
+      sampling (ADR-0011) and offline replay (ADR-0007) are the primary cost controls
+  ruler:
+    - Dimension definitions, categories, and sizes may be changed to improve precision and repeatability
+    - Original BCP philosophy, NFR dimension support, and SNAP compatibility are non-negotiable (ADR-0005)
+
+success_criteria:
+  - No complexity element is ever counted in two dimensions — proven by golden-fixture tests asserting
+    the Router's partition, per-dimension element counts, and expected splits for mixed-aspect sentences
+  - All 13 dimensions scored per story, each shaped as a Dimension Module with a written Identity Rule
+    and a criteria-defined (no-adjective) decision table
+  - Per-dimension CV < 20% for intrinsic dimensions, < 25% for maturity-dependent, measured on the
+    `reliable` maturity bucket only; aggregate CV ≈ 10-15%
+  - Every result carries a calibration_id provenance block; two results are declared comparable only
+    when calibration_id matches
+  - CLI, API, MCP, and SDK entry points all consume one orchestration function and the same typed result
+    (including Confidence Verdict) — no entry-point-specific reimplementation
+  - Stability harness supports record / report / replay, with replay re-scoring recorded responses
+    against new thresholds at zero additional API cost
+  - Whitepaper evolution document published, capturing every ruler change made for repeatability
+
+references:
+  - specs/PLAN.md
+  - specs/PLAN-AUDIT_LATEST.md
+  - specs/CONTEXT.md
+  - specs/stability-harness.md
+  - specs/ADRS/0001-element-router-owns-dimension-classification.md
+  - specs/ADRS/0002-router-emits-canonical-elements-via-identity-rules.md
+  - specs/ADRS/0003-aspect-splitting-and-business-rules-as-residual.md
+  - specs/ADRS/0004-rebaseline-over-bug-compatibility.md
+  - specs/ADRS/0005-ruler-evolution-mandate.md
+  - specs/ADRS/0006-criteria-defined-sizes-no-adjectives.md
+  - specs/ADRS/0007-pure-core-dimension-modules.md
+  - specs/ADRS/0008-retry-then-fail-no-partial-totals.md
+  - specs/ADRS/0009-parse-or-raise-prompt-contract.md
+  - specs/ADRS/0010-calibration-id-provenance.md
+  - specs/ADRS/0011-model-pinning-and-recalibration.md
+  - /Users/danielvm/Documents/BCP-Plus-Whitepaper.pdf

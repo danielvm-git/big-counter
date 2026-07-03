@@ -1,0 +1,19 @@
+story_id: e07s02
+title: "Security & Compliance + UX & Accessibility"
+status: todo
+bcps: 5
+tasks:
+  - id: e07s02t01
+    description: >
+      Security & Compliance Dimension Module (gate row included); fixture:
+      WCAG/compliance mentions route to the correct NFR dimension, standard
+      items gate to 0 with rationale.
+    verify: "venv/bin/python -m pytest tests/unit/test_dimension_security_compliance.py -q"
+    status: todo
+  - id: e07s02t02
+    description: >
+      UX & Accessibility Dimension Module; cross-check that all 14 SNAP
+      subcategories from whitepaper Exhibit 5 are reachable through the 13
+      dimensions' identity rules (documented mapping test).
+    verify: "venv/bin/python -m pytest tests/unit/test_dimension_ux_accessibility.py tests/unit/test_snap_mapping.py -q"
+    status: todo

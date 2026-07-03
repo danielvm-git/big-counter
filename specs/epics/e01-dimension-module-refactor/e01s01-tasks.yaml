@@ -1,0 +1,29 @@
+story_id: e01s01
+title: "Tracer: Business Rules as the first Dimension Module"
+status: todo
+bcps: 5
+slice_note: >
+  Thinnest vertical path: one dimension flows through the new module shape
+  end-to-end (build_variables -> render/call -> validate -> score) while the
+  other two stay on the legacy path. Proves the loop can run mixed
+  legacy/module steps with totals unchanged.
+tasks:
+  - id: e01s01t01
+    description: >
+      Create the Dimension Module protocol (name, prompt_file, build_variables,
+      validate, score returning itemized Dimension Score) and implement it for
+      Business Rules with today's weights.
+    verify: "test -f src/bcp/dimensions/business_rules.py && venv/bin/python -m pytest tests/unit/test_dimension_business_rules.py -q"
+    status: todo
+  - id: e01s01t02
+    description: >
+      Teach the calculator loop to execute Dimension Modules generically
+      alongside legacy steps; Business Rules runs via the module.
+    verify: "venv/bin/python -m pytest tests/unit/test_bcp_calculator.py -q"
+    status: todo
+  - id: e01s01t03
+    description: >
+      Prove behavior preservation: full unit suite passes with unchanged pinned
+      totals (no fixture edits in this story).
+    verify: "venv/bin/python -m pytest tests/unit/ -q"
+    status: todo

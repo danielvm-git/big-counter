@@ -1,0 +1,18 @@
+story_id: e01s03
+title: "Typed result model with provenance block, serialization-identical"
+status: todo
+bcps: 3
+tasks:
+  - id: e01s03t01
+    description: >
+      Introduce BCPResult model (story_name, steps, breakdown of Dimension
+      Scores, total_bcp, provenance block per ADR-0010 with calibration_id,
+      counter_version, ruler_version, provider, model_id, sampling params).
+    verify: "venv/bin/python -m pytest tests/unit/test_result_model.py -q"
+    status: todo
+  - id: e01s03t02
+    description: >
+      Serialization reproduces today's dict shape exactly (plus the new
+      provenance key); pinned CLI formatter tests pass unchanged.
+    verify: "venv/bin/python -m pytest tests/unit/test_cli.py -q"
+    status: todo

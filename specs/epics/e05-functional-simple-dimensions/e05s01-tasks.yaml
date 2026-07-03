@@ -1,0 +1,25 @@
+story_id: e05s01
+title: "Tracer: Notifications dimension (XS per notification event)"
+status: todo
+bcps: 3
+slice_note: >
+  Tracer for ALL new dimensions: proves the add-a-dimension recipe (Identity
+  Rule line in Router prompt + Dimension Module + fixtures) end-to-end on the
+  simplest scoring rule. The recipe this story establishes is what e05s02-e07s02
+  repeat.
+tasks:
+  - id: e05s01t01
+    description: >
+      Add Notification identity rule to the Router prompt (one element per
+      distinct notification event — recipient/trigger distinguishes; two emails
+      to different recipients = two elements, never collapsed).
+    verify: "grep -qi 'notification' src/bcp/prompts/step3_5_element_router.jinja2"
+    status: todo
+  - id: e05s01t02
+    description: "Notifications Dimension Module: XS(1) per routed element; itemized score."
+    verify: "venv/bin/python -m pytest tests/unit/test_dimension_notifications.py -q"
+    status: todo
+  - id: e05s01t03
+    description: "Golden fixtures extended with notification scenarios; full pipeline scores 4 dimensions."
+    verify: "venv/bin/python -m pytest tests/golden/ tests/unit/ -q"
+    status: todo

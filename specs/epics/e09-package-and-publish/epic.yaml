@@ -1,0 +1,12 @@
+id: e09
+slug: e09-package-and-publish
+title: Whitepaper evolution + upstream offer
+goal: >
+  Publish the ruler changes made during this initiative as a whitepaper
+  evolution (ADR-0005) — normative dimension boundaries, identity rules, and
+  criteria-defined size tables from specs/CONTEXT.md and the ADRs — and prepare
+  the PR/extension proposal for flow-ciandt/bcp-agent.
+adrs: ["0005"]
+depends_on: [e08]
+stories:
+  - {id: e09s01, title: "Whitepaper evolution document + upstream PR proposal", bcps: 8}

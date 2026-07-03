@@ -1,0 +1,20 @@
+story_id: e06s02
+title: "Solution Variabilities dimension (one element per axis)"
+status: todo
+bcps: 5
+tasks:
+  - id: e06s02t01
+    description: >
+      Router identity rule: one element per variability axis (not per branch);
+      selection conditions belong to the Variability, within-path
+      validation/transformation stays Business Rules (CONTEXT.md).
+    verify: "grep -qi 'variabilit' src/bcp/prompts/step3_5_element_router.jinja2"
+    status: todo
+  - id: e06s02t02
+    description: >
+      Variabilities Dimension Module, S(2)->XL(8) sized by counted branches per
+      axis and axis interaction (no 'extent' judgment). Fixture: payment
+      card/Pix/boleto with 3DS sub-variant = ONE variability element; boleto
+      expiry validation = separate Business Rules element.
+    verify: "venv/bin/python -m pytest tests/unit/test_dimension_variabilities.py tests/golden/ -q"
+    status: todo

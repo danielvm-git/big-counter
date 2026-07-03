@@ -1,0 +1,20 @@
+story_id: e02s04
+title: "Golden fixture corpus v1: partition, counts, mixed-sentence splits"
+status: todo
+bcps: 5
+tasks:
+  - id: e02s04t01
+    description: >
+      Author hand-scored fixtures (owner-adjudicated per ADR-0005) under
+      tests/fixtures/golden/: each story with expected elements, dimension tags,
+      per-dimension counts, and expected splits for mixed-aspect sentences
+      (include the refund/3DS scenario and a Test Plan email scenario).
+    verify: "test -d tests/fixtures/golden && venv/bin/python -c \"import os; assert len([f for f in os.listdir('tests/fixtures/golden') if f.endswith('.yaml')]) >= 3\""
+    status: todo
+  - id: e02s04t02
+    description: >
+      Fixture test suite asserting the invariants on recorded Router output:
+      exclusive ownership, count preservation (router count == sized count),
+      sum integrity, empty unclassified bucket on well-formed fixtures.
+    verify: "venv/bin/python -m pytest tests/golden/ -q"
+    status: todo

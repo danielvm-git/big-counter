@@ -1,0 +1,22 @@
+story_id: e07s01
+title: "Tracer: Quality Attributes with the NFR Gate pattern"
+status: todo
+bcps: 5
+slice_note: >
+  Establishes the NFR recipe: Router routes every distinct quality requirement;
+  the sizer's decision table has an explicit gate row. e07s02 repeats it.
+tasks:
+  - id: e07s01t01
+    description: >
+      Router identity rule: one element per distinct quality requirement
+      (performance target, scalability need, reliability constraint).
+    verify: "grep -qi 'quality' src/bcp/prompts/step3_5_element_router.jinja2"
+    status: todo
+  - id: e07s01t02
+    description: >
+      Quality Attributes Dimension Module: XS->XL table from SNAP-style countable
+      inputs; gate row 'standard expectation -> Size N/A, 0 points, one-line
+      rationale'. Fixture: 'page loads under 3s' gated to 0; an elevated SLA
+      scores.
+    verify: "venv/bin/python -m pytest tests/unit/test_dimension_quality_attributes.py tests/golden/ -q"
+    status: todo

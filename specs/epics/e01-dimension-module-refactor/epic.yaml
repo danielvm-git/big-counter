@@ -1,0 +1,15 @@
+id: e01
+slug: e01-dimension-module-refactor
+title: Behavior-preserving Dimension Module refactor
+goal: >
+  Extract the 3 existing dimensions into pure Dimension Modules (ADR-0007) with
+  itemized Dimension Scores and a generic calculator loop, plus a typed result
+  model carrying the provenance block (ADR-0010). Strictly behavior-preserving:
+  current inputs kept (including the Test-Plan double-feed, deliberately, as the
+  control group) so pinned test totals prove the refactor moved nothing.
+adrs: ["0007", "0010"]
+depends_on: []
+stories:
+  - {id: e01s01, title: "Tracer: Business Rules as the first Dimension Module", bcps: 5}
+  - {id: e01s02, title: "Migrate Boundaries + Interface Elements; delete match/case and StepLogger", bcps: 5}
+  - {id: e01s03, title: "Typed result model with provenance block, serialization-identical", bcps: 3}

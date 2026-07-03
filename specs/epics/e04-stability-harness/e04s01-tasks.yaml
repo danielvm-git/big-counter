@@ -1,0 +1,18 @@
+story_id: e04s01
+title: "Record mode: run N iterations, persist Replay Corpus with provenance"
+status: todo
+bcps: 5
+tasks:
+  - id: e04s01t01
+    description: >
+      run_stability.py record mode: N pipeline runs (deterministic sampling per
+      ADR-0011), one JSONL record per iteration under
+      tests/results/stability/<story-slug>/<calibration_id>/ with raw LLM
+      responses, routed elements, per-dimension counts and itemized scores,
+      maturity, verdict, retries, provenance, wall time and token usage.
+    verify: "test -f run_stability.py && venv/bin/python -m pytest tests/unit/test_stability_record.py -q"
+    status: todo
+  - id: e04s01t02
+    description: "Record smoke test against FakePromptHandler (no live API) produces schema-valid JSONL."
+    verify: "venv/bin/python -m pytest tests/unit/test_stability_record.py -k schema -q"
+    status: todo

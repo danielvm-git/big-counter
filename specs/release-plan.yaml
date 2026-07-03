@@ -1,0 +1,52 @@
+release: bcp-plus-1.0
+source_scope: specs/product/SCOPE_LATEST.yaml
+notes: >
+  WSJF = (business value + time criticality + risk reduction) / job size.
+  Ordering below is WSJF-descending; depends_on constrains actual start order
+  (e.g. e03 may run any time despite ranking below e01).
+epics:
+  - id: e01
+    slug: e01-dimension-module-refactor
+    title: Behavior-preserving Dimension Module refactor
+    wsjf: 8.3
+    depends_on: []
+  - id: e03
+    slug: e03-provider-config
+    title: Provider configuration cleanup
+    wsjf: 6.0
+    depends_on: []
+  - id: e02
+    slug: e02-element-router
+    title: Element Router, failure semantics, orchestration + verdict
+    wsjf: 5.8
+    depends_on: [e01]
+  - id: e04
+    slug: e04-stability-harness
+    title: Stability harness (record / report / replay)
+    wsjf: 5.5
+    depends_on: [e01, e02]
+  - id: e05
+    slug: e05-functional-simple-dimensions
+    title: Simple functional dimensions (Notifications, Audits, Background, Entities)
+    wsjf: 5.0
+    depends_on: [e02]
+  - id: e06
+    slug: e06-functional-complex-dimensions
+    title: Complex functional dimensions (Roles/Permissions, Variabilities)
+    wsjf: 4.0
+    depends_on: [e02]
+  - id: e07
+    slug: e07-nfr-dimensions
+    title: NFR dimensions with sizer-level gate (SNAP-derived criteria)
+    wsjf: 3.8
+    depends_on: [e02]
+  - id: e08
+    slug: e08-stability-tuning
+    title: 13-dimension stability tuning to CV targets
+    wsjf: 3.5
+    depends_on: [e04, e05, e06, e07]
+  - id: e09
+    slug: e09-package-and-publish
+    title: Whitepaper evolution + upstream offer
+    wsjf: 3.0
+    depends_on: [e08]

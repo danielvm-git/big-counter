@@ -1,0 +1,18 @@
+story_id: e05s03
+title: "Domain Entities + New Domain Entities (exclusive pair)"
+status: todo
+bcps: 5
+tasks:
+  - id: e05s03t01
+    description: >
+      Router identity rule: one element per entity, `new` flag routes to dim 7
+      (new) or dim 6 (existing-touched) — never both (Reading A, CONTEXT.md).
+    verify: "grep -qi 'entity' src/bcp/prompts/step3_5_element_router.jinja2"
+    status: todo
+  - id: e05s03t02
+    description: >
+      Both Dimension Modules with criteria-defined tables (dim 6 XS->XL, dim 7
+      M->L); fixture includes a new entity that is also read/validated/persisted
+      and asserts it scores ONLY in dim 7.
+    verify: "venv/bin/python -m pytest tests/unit/test_dimension_domain_entities.py tests/unit/test_dimension_new_domain_entities.py tests/golden/ -q"
+    status: todo

@@ -1,0 +1,13 @@
+id: e04
+slug: e04-stability-harness
+title: Stability harness (record / report / replay)
+goal: >
+  run_stability.py per specs/stability-harness.md — persists the Replay Corpus,
+  reports CV of subtotal AND element count per dimension (sizing flap vs routing
+  flap), replays recorded responses against candidate thresholds offline
+  (ADR-0007), and validates every record against the CONTEXT.md invariants.
+adrs: ["0007", "0010", "0011"]
+depends_on: [e01, e02]
+stories:
+  - {id: e04s01, title: "Record mode: run N iterations, persist Replay Corpus with provenance", bcps: 5}
+  - {id: e04s02, title: "Report + replay modes with guards and invariant checks", bcps: 5}

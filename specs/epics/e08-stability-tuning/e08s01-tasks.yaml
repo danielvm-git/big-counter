@@ -1,0 +1,13 @@
+story_id: e08s01
+title: "13-dimension baseline: 25-iteration recorded run + CV report"
+status: todo
+bcps: 3
+tasks:
+  - id: e08s01t01
+    description: >
+      Record 25 iterations per golden-corpus story on the pinned model with
+      deterministic sampling; produce the baseline CV report (subtotal + element
+      count per dimension, maturity-bucketed) and commit it as the Phase 1/5
+      baseline evidence (ADR-0004).
+    verify: "test -d tests/results/stability && venv/bin/python run_stability.py --report tests/results/stability/ > /dev/null && echo OK"
+    status: todo

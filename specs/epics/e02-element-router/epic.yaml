@@ -1,0 +1,17 @@
+id: e02
+slug: e02-element-router
+title: Element Router, failure semantics, orchestration + verdict
+goal: >
+  Single upstream classification pass giving every Complexity Element exactly one
+  owning dimension (ADR-0001/0002/0003); fixes the Test-Plan double-feed as the
+  ONLY behavior change on top of e01. Adds parse-or-raise (ADR-0009),
+  retry-then-fail with no partial totals (ADR-0008), the single orchestration
+  function with Confidence Verdict, and the first golden fixture corpus.
+  Score shifts vs pre-Router are expected and documented (ADR-0004).
+adrs: ["0001", "0002", "0003", "0004", "0008", "0009"]
+depends_on: [e01]
+stories:
+  - {id: e02s01, title: "Tracer: Router stage routes the 3 existing dimensions end-to-end", bcps: 8}
+  - {id: e02s02, title: "Parse-or-raise contract + retry-then-fail semantics", bcps: 5}
+  - {id: e02s03, title: "Orchestration function + Confidence Verdict; entry points become adapters", bcps: 5}
+  - {id: e02s04, title: "Golden fixture corpus v1: partition, counts, mixed-sentence splits", bcps: 5}

@@ -1,0 +1,22 @@
+story_id: e01s02
+title: "Migrate Boundaries + Interface Elements; delete match/case and StepLogger"
+status: todo
+bcps: 5
+tasks:
+  - id: e01s02t01
+    description: >
+      Implement Boundaries and Interface Elements as Dimension Modules
+      (Interface score() keeps ceil(n/5) bucketing; output itemized per
+      Dimension Score glossary term).
+    verify: "test -f src/bcp/dimensions/boundaries.py && test -f src/bcp/dimensions/interface_elements.py && venv/bin/python -m pytest tests/unit/test_dimension_boundaries.py tests/unit/test_dimension_interface_elements.py -q"
+    status: todo
+  - id: e01s02t02
+    description: >
+      Delete the per-dimension match/case block and input-plumbing branches from
+      calculate_bcp; loop is fully generic.
+    verify: "! grep -q 'match step\\[' src/bcp/bcp_calculator.py && venv/bin/python -m pytest tests/unit/ -q"
+    status: todo
+  - id: e01s02t03
+    description: "Delete StepLogger (Boy Scout, deletion test passed); inline f-string prefix at its single call site."
+    verify: "! grep -rq 'StepLogger' src/ && venv/bin/python -m pytest tests/unit/ -q"
+    status: todo

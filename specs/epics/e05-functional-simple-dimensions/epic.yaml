@@ -1,0 +1,14 @@
+id: e05
+slug: e05-functional-simple-dimensions
+title: Simple functional dimensions (Notifications, Audits, Background, Entities)
+goal: >
+  Add the count-based functional dimensions as Dimension Modules, each with a
+  written Identity Rule in the Router prompt and a criteria-defined decision
+  table (ADR-0006). Dims 6/7 (Domain Entities / New Domain Entities) are
+  mutually exclusive per entity — a `new` flag decides the dimension.
+adrs: ["0006", "0007"]
+depends_on: [e02]
+stories:
+  - {id: e05s01, title: "Tracer: Notifications dimension (XS per notification event)", bcps: 3}
+  - {id: e05s02, title: "Audits + Background Processes dimensions", bcps: 5}
+  - {id: e05s03, title: "Domain Entities + New Domain Entities (exclusive pair)", bcps: 5}

@@ -1,0 +1,14 @@
+id: e08
+slug: e08-stability-tuning
+title: 13-dimension stability tuning to CV targets
+goal: >
+  25-iteration protocol across all 13 dimensions on the golden corpus stories;
+  tune decision-table thresholds via offline replay first, Router identity rules
+  second, prompt prose last (ADR-0006). Targets on the `reliable` maturity
+  bucket: per-dimension CV < 20% intrinsic / < 25% maturity-dependent,
+  aggregate ~= 10-15%.
+adrs: ["0004", "0006", "0007", "0011"]
+depends_on: [e04, e05, e06, e07]
+stories:
+  - {id: e08s01, title: "13-dimension baseline: 25-iteration recorded run + CV report", bcps: 3}
+  - {id: e08s02, title: "Threshold tuning via replay until CV targets met", bcps: 8}
