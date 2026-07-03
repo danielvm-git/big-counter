@@ -18,7 +18,7 @@ environment:
 project_cycle:
   current_phase: 4
   phase_name: BUILD
-  active_epic: null
+  active_epic: e01
 
 bugs:
   total_registered: 10

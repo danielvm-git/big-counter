@@ -1,5 +1,5 @@
 release: bcp-plus-1.0
-active_epic: null
+active_epic: e01
 epics:
   e01: {status: todo, stories_done: 0, stories_total: 3}
   e02: {status: todo, stories_done: 0, stories_total: 4}
