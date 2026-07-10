@@ -1,0 +1,30 @@
+story_id: e09s02
+title: "BCP Ruler as OKF bundle with interactive graph visualization"
+status: todo
+bcps: 3
+tasks:
+  - id: e09s02t01
+    description: >
+      Create docs/bcp-ruler/ OKF bundle: index.md (methodology overview),
+      dimensions/ (13 concept docs with decision tables, identity rules,
+      and cross-links), concepts/ (domain glossary: Complexity Element,
+      Router, Sizer, Identity Rule, NFR Gate, Maturity Score).
+      All docs follow OKF v0.1 spec: YAML frontmatter with type/title/
+      description/tags/timestamp, markdown body with Schema/Examples/
+      Citations sections where applicable.
+    verify: >
+      test -f docs/bcp-ruler/index.md &&
+      test -f docs/bcp-ruler/dimensions/boundaries.md &&
+      test $(ls docs/bcp-ruler/dimensions/*.md | wc -l) -eq 13 &&
+      test -f docs/bcp-ruler/concepts/complexity-element.md
+    status: todo
+  - id: e09s02t02
+    description: >
+      Generate docs/bcp-ruler/viz.html using the OKF reference agent
+      visualizer. The graph must show all 13 dimensions as colored nodes,
+      cross-linked by identity rule relationships, with concept docs
+      linkable from the detail panel. Commit the bundle to the repo.
+    verify: >
+      test -f docs/bcp-ruler/viz.html &&
+      grep -q 'cytoscape' docs/bcp-ruler/viz.html
+    status: todo

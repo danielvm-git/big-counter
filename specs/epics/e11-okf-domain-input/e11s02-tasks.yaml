@@ -1,0 +1,23 @@
+story_id: e11s02
+title: "Inject domain knowledge into Entity dimensions (6, 7)"
+status: todo
+bcps: 3
+tasks:
+  - id: e11s02t01
+    description: >
+      Extend Domain Entities (dim 6) and New Domain Entities (dim 7) Sizers'
+      `build_variables()` to accept an optional `domain_bundle: OKFBundle | None`.
+      When present, include a "Known Entities" section in the prompt listing
+      entity titles and descriptions from the bundle. The LLM uses this to
+      determine existing vs. new.
+    verify: >
+      venv/bin/python -m pytest tests/unit/test_entity_sizers.py -q -k domain_bundle
+    status: todo
+  - id: e11s02t01b
+    description: >
+      Add golden-fixture test: story that mentions "Order" and "Refund" entities,
+      with a domain bundle declaring "Order" as existing and "Refund" absent.
+      Assert dim 6 scores Order, dim 7 scores Refund.
+    verify: >
+      venv/bin/python -m pytest tests/golden/test_okf_entity_routing.py -q
+    status: todo

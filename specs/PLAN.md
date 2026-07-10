@@ -68,7 +68,13 @@ Extend the existing `bcp-agent` (flow-ciandt/bcp-agent) from a 3-dimension simpl
 ### Phase 6: Package & Offer Back
 - Polish, document, add comparison tool
 - Write the BCP Plus whitepaper evolution — normative ruler definitions from specs/CONTEXT.md + ADRs (ADR-0005)
+- Ship BCP Ruler as OKF bundle with interactive graph (docs/bcp-ruler/)
+- Serialize BCP results as OKF bundles (e10)
 - Prepare PR/extension proposal for flow-ciandt/bcp-agent
+
+### Phase 7 (post-release): Domain Knowledge Input (e11)
+- Optional OKF domain bundle as BCP scoring reference material
+- Entity dimensions, Roles/Permissions, NFR dimensions benefit from domain ground truth
 
 ## Key Architectural Decisions
 1. **Per-dimension prompts** (whitepaper recommendation) — each dimension gets its own Jinja2 template, not a single chain

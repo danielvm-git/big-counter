@@ -1,0 +1,22 @@
+story_id: e11s01
+title: "OKF bundle loader with typed query API"
+status: todo
+bcps: 3
+tasks:
+  - id: e11s01t01
+    description: >
+      Implement `src/bcp/okf_loader.py` with `load_bundle(path: Path) -> OKFBundle`.
+      Parses all non-reserved .md files in the directory tree into typed concepts
+      (OKFConcept dataclass with frontmatter dict + body str). Reserved filenames
+      (index.md, log.md) are skipped. Uses only pyyaml — no Google ADK dependency.
+    verify: >
+      venv/bin/python -m pytest tests/unit/test_okf_loader.py -q -k test_parse_valid_bundle
+    status: todo
+  - id: e11s01t02
+    description: >
+      Add typed query methods to OKFBundle: `find_by_type(type: str)`,
+      `find_by_tag(tag: str)`, `find_by_title(title: str)`, `get(concept_id: str)`.
+      All return `list[OKFConcept]`. Tests for each query method.
+    verify: >
+      venv/bin/python -m pytest tests/unit/test_okf_loader.py -q
+    status: todo

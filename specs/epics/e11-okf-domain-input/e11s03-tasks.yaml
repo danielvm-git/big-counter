@@ -1,0 +1,25 @@
+story_id: e11s03
+title: "Inject domain knowledge into Roles (3) + NFR dimensions (11–13)"
+status: todo
+bcps: 3
+tasks:
+  - id: e11s03t01
+    description: >
+      Extend Roles/Permissions (dim 3) Sizer's `build_variables()` to accept
+      optional domain_bundle. When present, include a "Known Roles" section in
+      the prompt listing role titles, descriptions, and permission scopes from
+      the bundle. The LLM uses this to identify authorization complexity beyond
+      standard role assignments.
+    verify: >
+      venv/bin/python -m pytest tests/unit/test_roles_sizer.py -q -k domain_bundle
+    status: todo
+  - id: e11s03t02
+    description: >
+      Extend NFR Sizers (dims 11–13) `build_variables()` to accept optional
+      domain_bundle. When present, include "Standard Expectations" from the
+      bundle (Quality Standards, Compliance Requirements, Accessibility
+      Standards) as the NFR Gate baseline. Requirements matching standard
+      expectations score N/A (0 pts); those exceeding them score normally.
+    verify: >
+      venv/bin/python -m pytest tests/unit/test_nfr_sizers.py -q -k domain_bundle
+    status: todo

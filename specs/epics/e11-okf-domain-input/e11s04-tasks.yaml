@@ -1,0 +1,24 @@
+story_id: e11s04
+title: "CLI/API/MCP/SDK integration + golden-fixture tests"
+status: todo
+bcps: 3
+tasks:
+  - id: e11s04t01
+    description: >
+      Add `--knowledge-bundle <path>` flag to all entry points (run_cli.py,
+      run_api_server.py, run_mcp.py, run_mcp_http_server.py, SDK client).
+      Pass through to BCPCalculator.run() which injects into Sizer
+      build_variables() calls. Absent flag = current behavior preserved.
+    verify: >
+      venv/bin/python run_cli.py tests/data/story-simple.md --knowledge-bundle tests/data/okf/domain-sample/ &&
+      venv/bin/python -m pytest tests/unit/ -q
+    status: todo
+  - id: e11s04t02
+    description: >
+      Create sample domain OKF bundle at tests/data/okf/domain-sample/ with
+      3 entities, 2 roles, 1 quality standard. Write integration test that
+      runs full pipeline with --knowledge-bundle and asserts BCP scores differ
+      from the baseline (no-bundle) run in expected directions.
+    verify: >
+      venv/bin/python -m pytest tests/integration/test_okf_domain_integration.py -q
+    status: todo

@@ -9,4 +9,6 @@ epics:
   e06: {status: todo, stories_done: 0, stories_total: 2}
   e07: {status: todo, stories_done: 0, stories_total: 2}
   e08: {status: todo, stories_done: 0, stories_total: 2}
-  e09: {status: todo, stories_done: 0, stories_total: 1}
+  e09: {status: todo, stories_done: 0, stories_total: 2}
+  e10: {status: todo, stories_done: 0, stories_total: 2}
+  e11: {status: todo, stories_done: 0, stories_total: 4}

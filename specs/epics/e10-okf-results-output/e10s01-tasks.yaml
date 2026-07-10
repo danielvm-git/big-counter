@@ -1,0 +1,25 @@
+story_id: e10s01
+title: "OKF serializer: BCPResult → markdown+frontmatter bundle"
+status: todo
+bcps: 3
+tasks:
+  - id: e10s01t01
+    description: >
+      Implement `src/bcp/okf_serializer.py` with `serialize_result(result: BCPResult, out_dir: Path) -> None`.
+      Writes OKF v0.1-conformant markdown files: index.md (total BCP, verdict),
+      story.md (original story), elements/<slug>.md per Complexity Element (with
+      dimension cross-links), dimensions/<slug>.md per dimension (subtotal +
+      sized elements + rationale), provenance.md (calibration_id, model_id).
+      Uses only pyyaml (already in deps). Parser: a lightweight OKFDocument class
+      (~30 lines) — does NOT depend on the Google ADK reference agent.
+    verify: >
+      venv/bin/python -m pytest tests/unit/test_okf_serializer.py -q &&
+      venv/bin/python -c "from src.bcp.okf_serializer import serialize_result; print('import OK')"
+    status: todo
+  - id: e10s01t02
+    description: >
+      Add unit tests for serialize_result: verify all files written, frontmatter
+      has required keys, element→dimension links resolve, round-trip parse
+      matches input BCPResult.
+    verify: "venv/bin/python -m pytest tests/unit/test_okf_serializer.py -q"
+    status: todo

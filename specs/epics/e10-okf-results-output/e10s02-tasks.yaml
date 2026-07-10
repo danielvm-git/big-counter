@@ -1,0 +1,23 @@
+story_id: e10s02
+title: "CLI + stability harness integration with --output-okf flag"
+status: todo
+bcps: 2
+tasks:
+  - id: e10s02t01
+    description: >
+      Add `--output-okf <dir>` flag to `run_cli.py`. When set, call
+      `serialize_result()` after scoring. Generate viz.html by shelling out to
+      the OKF visualizer if available, or skip with a warning.
+    verify: >
+      venv/bin/python run_cli.py tests/data/story-simple.md --output-okf /tmp/test-okf &&
+      test -f /tmp/test-okf/index.md && test -f /tmp/test-okf/elements/index.md
+    status: todo
+  - id: e10s02t02
+    description: >
+      Add `--output-okf <dir>` flag to `run_stability.py`. Each iteration writes
+      its own subdirectory under the output dir, enabling visual diffing of
+      Router behavior across runs.
+    verify: >
+      venv/bin/python run_stability.py tests/data/story-simple.md --iterations 3 --output-okf /tmp/test-okf-stability &&
+      test $(ls /tmp/test-okf-stability/ | wc -l) -eq 3
+    status: todo

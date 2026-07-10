@@ -1,6 +1,6 @@
 id: e09
 slug: e09-package-and-publish
-title: Whitepaper evolution + upstream offer
+title: Whitepaper evolution + OKF ruler bundle + upstream offer
 goal: >
   Publish the ruler changes made during this initiative as a whitepaper
   evolution (ADR-0005) — normative dimension boundaries, identity rules, and
@@ -10,3 +10,4 @@ adrs: ["0005"]
 depends_on: [e08]
 stories:
   - {id: e09s01, title: "Whitepaper evolution document + upstream PR proposal", bcps: 8}
+  - {id: e09s02, title: "BCP Ruler as OKF bundle with interactive graph visualization", bcps: 3}

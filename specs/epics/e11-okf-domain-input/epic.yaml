@@ -1,0 +1,17 @@
+id: e11
+slug: e11-okf-domain-input
+title: Domain knowledge OKF bundle as BCP scoring reference material
+goal: >
+  The BCP agent optionally consumes an OKF domain knowledge bundle as reference
+  material, transforming scoring from "guess from story text" to "reason with
+  domain ground truth." Implement `src/bcp/okf_loader.py` (typed query API over
+  an OKF bundle), inject domain context into affected Sizer prompts (entities,
+  roles, NFR standards), and wire the `--knowledge-bundle <path>` flag through
+  all entry points (CLI, API, MCP, SDK).
+adrs: []
+depends_on: [e05, e06, e07]
+stories:
+  - {id: e11s01, title: "OKF bundle loader with typed query API", bcps: 3}
+  - {id: e11s02, title: "Inject domain knowledge into Entity dimensions (6, 7)", bcps: 3}
+  - {id: e11s03, title: "Inject domain knowledge into Roles (3) + NFR dimensions (11–13)", bcps: 3}
+  - {id: e11s04, title: "CLI/API/MCP/SDK integration + golden-fixture tests", bcps: 3}

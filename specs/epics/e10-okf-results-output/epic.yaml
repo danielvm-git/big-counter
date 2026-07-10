@@ -1,0 +1,15 @@
+id: e10
+slug: e10-okf-results-output
+title: BCP results serialized as OKF bundle with graph visualization
+goal: >
+  After scoring a story, the BCP counter can optionally output results as an
+  Open Knowledge Format (OKF v0.1) bundle — a directory of markdown+frontmatter
+  files with a viz.html interactive graph. Complexity Elements link to their
+  owning Dimensions; the graph makes Router behavior visually auditable.
+  Implement `src/bcp/okf_serializer.py` (~100 lines) and wire it into the CLI
+  and stability harness via `--output-okf <dir>`.
+adrs: []
+depends_on: [e02]
+stories:
+  - {id: e10s01, title: "OKF serializer: BCPResult → markdown+frontmatter bundle", bcps: 3}
+  - {id: e10s02, title: "CLI + stability harness integration with --output-okf flag", bcps: 2}

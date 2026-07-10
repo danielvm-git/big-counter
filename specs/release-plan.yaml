@@ -4,6 +4,20 @@ notes: >
   WSJF = (business value + time criticality + risk reduction) / job size.
   Ordering below is WSJF-descending; depends_on constrains actual start order
   (e.g. e03 may run any time despite ranking below e01).
+hard_gates:
+  - gate: e01-before-e02
+    description: >
+      HARD GATE — Behavior-preserving Dimension Module refactor must land before
+      the Element Router. The Router depends on the new module shape (protocol,
+      validate, score) and the calculator loop refactored in e01. No Router code
+      can be written until e01 is merged and tests pass.
+    depends: e02 starts only after e01 completed
+  - gate: e08-before-e09
+    description: >
+      HARD GATE — 13-dimension stability tuning must complete before publishing
+      the whitepaper evolution or preparing the upstream offer. e09 depends on
+      CV data from e08 to justify ruler changes. No publish work begins until
+      aggregate CV meets the ≈10-15% target on the `reliable` maturity bucket.
 epics:
   - id: e01
     slug: e01-dimension-module-refactor
@@ -47,6 +61,16 @@ epics:
     depends_on: [e04, e05, e06, e07]
   - id: e09
     slug: e09-package-and-publish
-    title: Whitepaper evolution + upstream offer
+    title: Whitepaper evolution + OKF ruler bundle + upstream offer
     wsjf: 3.0
     depends_on: [e08]
+  - id: e10
+    slug: e10-okf-results-output
+    title: BCP results serialized as OKF bundle with graph visualization
+    wsjf: 2.5
+    depends_on: [e02]
+  - id: e11
+    slug: e11-okf-domain-input
+    title: Domain knowledge OKF bundle as BCP scoring reference material
+    wsjf: 2.0
+    depends_on: [e05, e06, e07]

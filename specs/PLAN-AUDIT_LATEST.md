@@ -1,49 +1,71 @@
 # Plan Audit — BCP Plus: Full 13-Dimension Counter
-**Date:** 2026-07-02 · **Verdict:** READY (with advisory notes)
+**Date:** 2026-07-04 · **Verdict:** READY (non-blocking gaps noted)
 
 ## Principles Alignment
 | Check | Status | Note |
 |---|---|---|
-| Vertical slices | ✅ | 9 epics in WSJF order, each verifiably shippable. Dependencies encoded via `depends_on` in release-plan.yaml. |
-| Scope bounded | ✅ | `specs/product/SCOPE_LATEST.yaml` has explicit `in_scope` (8 items, mapped to epics) and `out_of_scope` (7 items with reasons). |
-| Success criteria | ✅ | 7 criteria in SCOPE_LATEST.yaml, including cross-dimension exclusivity, calibration_id provenance, and replay-based measurement. |
-| HARD GATE candidates | ⚠️ | Not explicitly tagged. Epic boundaries e01→e02 (refactor before router) and e08→e09 (CV targets before publish) are natural gates per `depends_on`. Epics e03 and e06/e07 are marked "may run any time" / independent — correctly not gated. |
-| Domain language | ⚠️ | `specs/CONTEXT.md` exists as a domain glossary. No `UBIQUITOUS_LANGUAGE_LATEST.md` — but CONTEXT.md serves the same function (defines dimensions, invariants, identity rules). Acceptable substitution. |
+| Vertical slices | ✅ | 11 epics, each with story-level `-tasks.yaml` files and explicit `verify:` commands per task. Active e01 has 3 stories, all `todo`. |
+| Scope bounded | ⚠️ | `specs/product/SCOPE_LATEST.yaml` maps 8 in_scope items to epics e01–e09 only. Epics **e10** (OKF results output) and **e11** (OKF domain input) exist in `release-plan.yaml`, `execution-status.yaml`, and have full epic/task files, but are **not listed in SCOPE_LATEST.yaml's `in_scope`** and have no `success_criteria` entries. The scope document has drifted behind the release plan. |
+| Success criteria | ⚠️ | 7 criteria in SCOPE_LATEST.yaml cover the original 9-epic scope; none reference the OKF bundle work (e09s02, e10, e11) added since the last audit. |
+| HARD GATE candidates | ⚠️ | `release-plan.yaml` labels e01→e02 and e08→e09 as HARD GATEs. The e08→e09 gate text reads "No publish work begins until aggregate CV meets the target" — but `docs/bcp-ruler/` (e09s02's full deliverable: index.md, 13 dimension docs, 7 concept docs, viz.html with cytoscape) **already exists in the repo**, while e08 has not started. `specs/okf-integration/PLAN.md` justifies this as "documentation artifact — zero code changes... can be drafted now," but the gate's own wording in `release-plan.yaml` doesn't carve out that exception. Either narrow the gate text to exclude doc-only e09s02 work, or the gate is technically already violated. |
+| Domain language | ✅ | `specs/CONTEXT.md` unchanged — 20+ domain terms, invariants, legal state transitions. |
 
 ## Conventions Completeness
 | Check | Status | Note |
 |---|---|---|
-| CLAUDE.md | ✅ | Present, includes CI/observability/release reference tables. |
-| CONVENTIONS.md | ✅ | Present with Python conventions. |
-| specs/ layout | ✅ | Full layout: ADRS/ (11 ADRs), product/, epics/ (9), bugs/ (10 fixed), execution-status.yaml, release-plan.yaml, CONTEXT.md, stability-harness.md. |
-| Commit conventions | ✅ | Conventional Commits documented and followed (15 commits on main). |
-| Git workflow mode | ⚠️ | CONVENTIONS.md mandates "never push directly — always feature branches and PRs." Practice: all commits on `main`. This is tracked as `out_of_scope` in SCOPE_LATEST.yaml ("resolve opportunistically, not a blocking dependency"). Advisory — does not block BUILD. |
+| CLAUDE.md / AGENTS.md | ✅ | Present, now includes `bts` toolchain guidance. |
+| CONVENTIONS.md | ✅ | 75 lines, solo-git workflow, Python conventions, defensive patterns. |
+| specs/ layout | ✅ | Plus two new untracked dirs since last audit: `specs/okf-integration/` (integration plan for e09s02/e10/e11) and `specs/tech-architecture/` (map-codebase output). |
+| Commit conventions | ✅ | Conventional Commits documented and in use. |
+| Git workflow mode | ✅ | solo-git, documented. |
 
-## Pre-flight Answers
-| Question | Value | Note |
-|---|---|---|
-| Test command | `python -m pytest tests/unit/ -v` | ✅ 53/53 pass |
-| Build command | `pip install -e .` | ⚠️ No artifact build step; fine for CLI tool |
-| Lint command | `black --check . && isort --check-only .` | ✅ |
-| Typecheck command | `mypy src/` (locally 0 errors) | ⚠️ CI runs `mypy src/ \|\| true` (advisory). Local pre-commit is hard gate. Tracked in `out_of_scope` as "resolve opportunistically." |
-| CI platform | GitHub Actions | ✅ CI + Release workflows |
-| Solo or team | Solo-git (practiced) | ⚠️ CONVENTIONS.md says team-pr. Not a build blocker. |
-| Language + framework | Python 3.10+ / LangChain | ✅ |
-| Greenfield or existing | Existing — bcp-agent fork, v1.0.0 | ✅ |
-| Stability harness | `run_stability.py` | ❌ Does not exist yet — but its spec exists (`specs/stability-harness.md`) and it's scoped to epic e04 which depends on e01+e02. Not a Phase 1 blocker: Phase 1 is the Dimension Module refactor (e01), Element Router (e02), and ProviderConfig (e03). The harness is needed *after* the Router exists. Plan ordering is correct. |
+## Pre-flight Answers (re-verified this run)
+| Question | Value | Status | Note |
+|---|---|---|---|
+| Test command | `venv/bin/python -m pytest tests/ -q` | ✅ | 54 passed, 0 failed, 88% coverage — matches last audit exactly. |
+| Build command | `pip install -e .` | ⚠️ | Editable install; acceptable for CLI/MCP tool, no gate blocked. |
+| Lint command | `black --check . && isort --check-only .` | ✅ | 35 files clean; isort clean (3 skipped). |
+| Typecheck command | `mypy src/` | ✅ | 0 errors, 12 source files. |
+| CI platform | GitHub Actions | ✅ | `.github/workflows/ci.yaml` — mypy is a **hard gate** (`|| true` removed, confirmed via diff). |
+| Solo or team | Solo-git | ✅ | |
+| Language + framework | Python 3.10+ / LangChain | ✅ | |
+| Greenfield or existing | Existing — bcp-agent fork, v1.0.1, mature | ✅ | |
+| Stability harness | `run_stability.py` (pending) | ⚠️ | Still correctly scoped to e04, sequenced after e01+e02. |
+
+## Current Baseline (2026-07-04 re-measured)
+- `venv/bin/python -m pytest tests/ -q`: **54 passed**, 4 warnings, 0 failures, 88% coverage — unchanged since 2026-07-03.
+- `black --check .`: 35 files clean. `isort --check-only .`: clean.
+- `mypy src/`: **0 errors** on 12 source files.
+- CI `.github/workflows/ci.yaml`: mypy hard gate confirmed (no `|| true`).
+- Active epic: **e01** (BUILD phase 4), 3 stories, all `todo` — unchanged.
+- `execution-status.yaml` now tracks 11 epics (e10, e11 added); all still `todo`, 0 stories done anywhere.
 
 ## Open Gaps
 
-### Pre-existing (tracked in SCOPE_LATEST out_of_scope)
-- [ ] Solo-git vs team-pr workflow contradiction — "resolve opportunistically"
-- [ ] CI mypy `|| true` vs pre-commit hard gate — "resolve opportunistically"
-- [ ] Transport resilience beyond validation retry — "deferred, fast-follow if blocker"
+### New since last audit (non-blocking for e01, should close before e09/e10 start)
+- [ ] Add `e10` and `e11` to `specs/product/SCOPE_LATEST.yaml`'s `in_scope` list with `maps_to` entries, and extend `success_criteria` to cover OKF results output and domain-knowledge input — the scope doc is the canonical "what ships" record and currently under-represents the release plan (run `scope-work`).
+- [ ] Reconcile the `e08-before-e09` HARD GATE wording in `release-plan.yaml` against the fact that e09s02's full deliverable (`docs/bcp-ruler/`) is already committed while e08 hasn't started. Either scope the gate text to exclude doc-only stories explicitly, or mark `e09s02` status accurately in `execution-status.yaml`/`e09s02-tasks.yaml` (currently both say `todo` despite the artifact existing) so state tracking isn't drifted.
+- [ ] `specs/tech-architecture/tech-stack.md` (new, generated by `map-codebase`) is already stale: it states "mypy run as advisory (`|| true` in CI)," which the current `.github/workflows/ci.yaml` contradicts (hard gate, confirmed above). Regenerate or correct before relying on it.
+- [ ] `app.py` (new BigBase deployment entry point, untracked) introduces a production deployment path not referenced by any epic, ADR, or the scope doc. Not blocking, but should get a line item — either its own fast-follow epic or an explicit `out_of_scope`/`in_scope` note in `SCOPE_LATEST.yaml`.
 
-### Pre-flight (non-blocking)
-- [ ] `run_stability.py` doesn't exist — but it's scoped to epic e04, which correctly depends on e01+e02. The harness spec is written. No build work is blocked by missing it now.
-- [ ] No explicit HARD GATE labels on epic boundaries — `depends_on` in release-plan.yaml serves the same function for build ordering. Add labels for human readability during build.
+### Carried over (still non-blocking)
+- [ ] `specs/state.yaml` reports 17 tests / 81% coverage; actual is 54 tests / 88% coverage. Still drifted since the 2026-07-03 audit — update after next milestone.
+- [ ] `run_stability.py` — correctly deferred to e04.
+- [ ] `pip install -e .` editable install — acceptable for this tool type.
+
+## Resolved (from prior audits)
+| Gap | Resolution |
+|---|---|
+| `black` + `isort` not clean | Fixed — 35 files clean. |
+| CI mypy soft gate | Fixed — `|| true` removed, mypy 0 errors, re-confirmed this run. |
+| Solo-git vs team-pr contradiction | Fixed — CONVENTIONS.md documents `solo-git`. |
+| No HARD GATE labels | Fixed — `hard_gates` in release-plan.yaml. |
+| 49→54 tests, 82%→88% coverage | Stable — no regression since last audit. |
 
 ## Verdict
-**READY** — all 6 gaps from the prior audit are closed. The 2 remaining items (solo-git, CI mypy) are pre-existing, explicitly acknowledged in `out_of_scope`, and don't block building BCP Plus features. The stability harness doesn't exist yet but is correctly sequenced after the Router (e02), not before.
+**READY** — no gap blocks starting or continuing e01. Tests, lint, and typecheck are all green and unchanged from the prior audit. The new gaps are all about **scope-document drift** (SCOPE_LATEST.yaml not reflecting e10/e11 and the OKF work) and **one internal inconsistency** (the e08→e09 hard gate vs. the already-committed e09s02 artifact) — none touch e01's dependencies or verify commands. Recommend closing the scope-doc gaps opportunistically, ideally before e09 or e10 actually start, not before e01.
 
-Proceed with `survey-context` → `build-epic e01`.
+## Recommended Next Skill
+`build-epic e01` (active epic, 0/3 stories done — pick up where the last audit left off).
+
+Opportunistic, not blocking: `scope-work` to reconcile `SCOPE_LATEST.yaml` with e10/e11 and the OKF integration plan.
