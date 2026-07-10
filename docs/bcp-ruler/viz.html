@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OKF Bundle Viewer</title>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  color: #0f172a;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+.title strong { font-size: 16px; margin-right: 8px; }
+.muted { color: #64748b; font-size: 12px; }
+.controls { display: flex; gap: 8px; }
+.controls input, .controls select, .controls button {
+  font-size: 13px;
+  padding: 5px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+}
+.controls input { width: 220px; }
+.controls button { cursor: pointer; background: #f1f5f9; }
+.controls button:hover { background: #e2e8f0; }
+
+main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+#graph {
+  flex: 1 1 60%;
+  background: #fff;
+  border-right: 1px solid #e2e8f0;
+  min-width: 0;
+  position: relative;
+}
+#detail {
+  flex: 0 0 40%;
+  overflow-y: auto;
+  padding: 18px 22px;
+  background: #fff;
+}
+#detail-empty {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.detail-header { margin-bottom: 12px; }
+.detail-header h1 {
+  font-size: 18px;
+  margin: 4px 0 2px;
+  font-weight: 600;
+}
+.type-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+dl.frontmatter {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  row-gap: 4px;
+  column-gap: 12px;
+  margin: 8px 0 12px;
+  font-size: 13px;
+}
+dl.frontmatter dt {
+  color: #64748b;
+  font-weight: 500;
+}
+dl.frontmatter dd { margin: 0; }
+dl.frontmatter a { color: #2563eb; word-break: break-all; }
+
+.tag {
+  display: inline-block;
+  padding: 1px 6px;
+  margin: 0 4px 2px 0;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+}
+
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
+
+#detail-body { font-size: 13px; line-height: 1.55; }
+#detail-body h1 {
+  font-size: 16px; margin: 18px 0 6px;
+  padding-bottom: 4px; border-bottom: 1px solid #e2e8f0;
+}
+#detail-body h2 { font-size: 14px; margin: 14px 0 4px; }
+#detail-body h3 { font-size: 13px; margin: 12px 0 4px; }
+#detail-body p { margin: 6px 0; }
+#detail-body code {
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+}
+#detail-body pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 12px;
+}
+#detail-body pre code { background: transparent; color: inherit; padding: 0; }
+#detail-body ul, #detail-body ol { padding-left: 22px; margin: 6px 0; }
+#detail-body li { margin: 2px 0; }
+#detail-body table { border-collapse: collapse; margin: 8px 0; }
+#detail-body th, #detail-body td {
+  border: 1px solid #e2e8f0; padding: 4px 8px; font-size: 12px;
+}
+#detail-body a.internal { color: #2563eb; cursor: pointer; }
+#detail-body a.external { color: #2563eb; }
+
+#detail-backlinks { margin-top: 18px; }
+#detail-backlinks h2 { font-size: 13px; color: #64748b; margin-bottom: 6px; }
+#detail-backlinks ul { padding-left: 18px; }
+#detail-backlinks a { color: #2563eb; cursor: pointer; }
+
+</style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <strong id="bundle-name"></strong>
+    <span class="muted">OKF bundle</span>
+  </div>
+  <div class="controls">
+    <input id="search" type="search" placeholder="Search title / id / tag">
+    <select id="filter-type">
+      <option value="">All types</option>
+    </select>
+    <select id="layout">
+      <option value="cose">cose (force)</option>
+      <option value="concentric">concentric</option>
+      <option value="breadthfirst">breadth-first</option>
+      <option value="circle">circle</option>
+      <option value="grid">grid</option>
+    </select>
+    <button id="reset">Reset view</button>
+  </div>
+</header>
+
+<main>
+  <section id="graph"></section>
+  <section id="detail">
+    <div id="detail-empty" class="muted">Click a node to see its details.</div>
+    <article id="detail-content" hidden>
+      <header class="detail-header">
+        <span class="type-chip" id="detail-type"></span>
+        <h1 id="detail-title"></h1>
+        <div class="muted" id="detail-id"></div>
+      </header>
+      <dl class="frontmatter">
+        <dt>Description</dt><dd id="detail-description"></dd>
+        <dt>Resource</dt><dd id="detail-resource"></dd>
+        <dt>Tags</dt><dd id="detail-tags"></dd>
+      </dl>
+      <hr>
+      <div id="detail-body"></div>
+      <section id="detail-backlinks" hidden>
+        <h2>Cited by</h2>
+        <ul id="backlinks-list"></ul>
+      </section>
+    </article>
+  </section>
+</main>
+
+<script>
+window.BUNDLE_NAME = "BCP Plus Ruler";
+window.BUNDLE = {"nodes": [{"data": {"id": "concepts/complexity-element", "label": "Complexity Element", "type": "Concept", "description": "One atomic, countable thing found in a story that contributes points to exactly one Dimension.\n", "tags": ["core", "domain-model"], "color": "#10b981", "size": 36}}, {"data": {"id": "concepts/dimension-module", "label": "Dimension Module", "type": "Concept", "description": "The code shape of one Dimension \u2014 prompt file + expected response shape + decision-table scoring \u2014 as pure functions with no LLM I/O.\n", "tags": ["core", "architecture"], "color": "#10b981", "size": 37}}, {"data": {"id": "concepts/element-router", "label": "Element Router", "type": "Concept", "description": "The single upstream pass (Step 3.5) that extracts Complexity Elements from a story and assigns each to exactly one Dimension.\n", "tags": ["core", "pipeline"], "color": "#10b981", "size": 36}}, {"data": {"id": "concepts/identity-rule", "label": "Identity Rule", "type": "Concept", "description": "Per-Dimension definition of what makes one Complexity Element distinct, enforced by the Element Router.\n", "tags": ["core", "domain-model"], "color": "#10b981", "size": 40}}, {"data": {"id": "concepts/maturity-score", "label": "Maturity Score", "type": "Concept", "description": "Confidence indicator accompanying every BCP total \u2014 derived from story specificity, domain clarity, and requirement precision.\n", "tags": ["core", "quality"], "color": "#10b981", "size": 37}}, {"data": {"id": "concepts/nfr-gate", "label": "NFR Gate", "type": "Concept", "description": "The bottom rung of each NFR Sizer's rubric \u2014 a requirement judged a standard expectation scores N/A (0 points) with a one-line rationale.\n", "tags": ["core", "nfr"], "color": "#10b981", "size": 38}}, {"data": {"id": "concepts/sizer", "label": "Sizer", "type": "Concept", "description": "A per-Dimension step that assigns a Size/Score to the Complexity Elements routed to it using criteria-defined decision tables.\n", "tags": ["core", "pipeline"], "color": "#10b981", "size": 36}}, {"data": {"id": "dimensions/audits", "label": "Audits", "type": "Dimension", "description": "Counts audit-trail requirements \u2014 entities whose state changes must be logged, tracked, or made traceable.\n", "tags": ["functional", "planned"], "color": "#3b82f6", "size": 36}}, {"data": {"id": "dimensions/background-processes", "label": "Background Processes", "type": "Dimension", "description": "Counts asynchronous or scheduled work \u2014 jobs, queues, cron tasks, event handlers that run outside the request-response cycle.\n", "tags": ["functional", "planned"], "color": "#3b82f6", "size": 36}}, {"data": {"id": "dimensions/boundaries", "label": "Boundaries", "type": "Dimension", "description": "Counts distinct interaction boundaries \u2014 each external system, service, or medium the story crosses.\n", "tags": ["functional", "intrinsic", "existing"], "color": "#3b82f6", "size": 36}}, {"data": {"id": "dimensions/business-rules", "label": "Business Rules", "type": "Dimension", "description": "The residual dimension for conditional logic \u2014 receives validation, transformation, and decision rules not claimed by more specific dimensions.\n", "tags": ["functional", "intrinsic", "existing", "residual"], "color": "#3b82f6", "size": 38}}, {"data": {"id": "dimensions/domain-entities", "label": "Domain Entities", "type": "Dimension", "description": "Counts existing domain entities touched (read, validated, updated) by the story. Mutually exclusive with New Domain Entities per entity.\n", "tags": ["functional", "planned"], "color": "#3b82f6", "size": 37}}, {"data": {"id": "dimensions/interface-elements", "label": "Interface Elements", "type": "Dimension", "description": "Counts human-facing UI elements \u2014 both static (display) and dynamic (interactive) \u2014 bucketed in groups of 5.\n", "tags": ["functional", "intrinsic", "existing"], "color": "#3b82f6", "size": 38}}, {"data": {"id": "dimensions/new-domain-entities", "label": "New Domain Entities", "type": "Dimension", "description": "Counts domain entities created by the story. Mutually exclusive with Domain Entities per entity \u2014 a new entity scores only here, never in both.\n", "tags": ["functional", "planned"], "color": "#3b82f6", "size": 37}}, {"data": {"id": "dimensions/notifications", "label": "Notifications", "type": "Dimension", "description": "Counts distinct notification events \u2014 emails, push notifications, SMS, Slack messages, in-app alerts triggered by the story.\n", "tags": ["functional", "planned"], "color": "#3b82f6", "size": 37}}, {"data": {"id": "dimensions/quality-attributes", "label": "Quality Attributes", "type": "Dimension", "description": "NFR dimension \u2014 counts quality attribute requirements (performance, reliability, scalability, maintainability) that exceed standard expectations.\n", "tags": ["non-functional", "planned", "nfr"], "color": "#3b82f6", "size": 39}}, {"data": {"id": "dimensions/roles-permissions", "label": "Roles / Permissions", "type": "Dimension", "description": "Counts authorization complexity \u2014 distinct roles, permission checks, and access-control rules referenced by the story.\n", "tags": ["functional", "planned"], "color": "#3b82f6", "size": 36}}, {"data": {"id": "dimensions/security-compliance", "label": "Security & Compliance", "type": "Dimension", "description": "NFR dimension \u2014 counts security and compliance requirements (authentication, encryption, data protection, regulatory) that exceed standard expectations.\n", "tags": ["non-functional", "planned", "nfr"], "color": "#3b82f6", "size": 41}}, {"data": {"id": "dimensions/solution-variabilities", "label": "Solution Variabilities", "type": "Dimension", "description": "Counts alternative solution paths \u2014 distinct axes of variability where the system must behave differently based on context.\n", "tags": ["functional", "planned"], "color": "#3b82f6", "size": 38}}, {"data": {"id": "dimensions/ux-accessibility", "label": "UX & Accessibility", "type": "Dimension", "description": "NFR dimension \u2014 counts user experience and accessibility requirements (usability, localization, WCAG compliance, UX complexity) that exceed standard expectations.\n", "tags": ["non-functional", "planned", "nfr"], "color": "#3b82f6", "size": 40}}], "edges": [{"data": {"id": "concepts/complexity-element__concepts/element-router", "source": "concepts/complexity-element", "target": "concepts/element-router"}}, {"data": {"id": "concepts/complexity-element__concepts/sizer", "source": "concepts/complexity-element", "target": "concepts/sizer"}}, {"data": {"id": "concepts/complexity-element__dimensions/roles-permissions", "source": "concepts/complexity-element", "target": "dimensions/roles-permissions"}}, {"data": {"id": "concepts/complexity-element__dimensions/business-rules", "source": "concepts/complexity-element", "target": "dimensions/business-rules"}}, {"data": {"id": "concepts/dimension-module__concepts/sizer", "source": "concepts/dimension-module", "target": "concepts/sizer"}}, {"data": {"id": "concepts/element-router__concepts/complexity-element", "source": "concepts/element-router", "target": "concepts/complexity-element"}}, {"data": {"id": "concepts/element-router__concepts/identity-rule", "source": "concepts/element-router", "target": "concepts/identity-rule"}}, {"data": {"id": "concepts/element-router__dimensions/business-rules", "source": "concepts/element-router", "target": "dimensions/business-rules"}}, {"data": {"id": "concepts/element-router__concepts/sizer", "source": "concepts/element-router", "target": "concepts/sizer"}}, {"data": {"id": "concepts/identity-rule__concepts/complexity-element", "source": "concepts/identity-rule", "target": "concepts/complexity-element"}}, {"data": {"id": "concepts/identity-rule__concepts/element-router", "source": "concepts/identity-rule", "target": "concepts/element-router"}}, {"data": {"id": "concepts/identity-rule__dimensions/boundaries", "source": "concepts/identity-rule", "target": "dimensions/boundaries"}}, {"data": {"id": "concepts/identity-rule__dimensions/interface-elements", "source": "concepts/identity-rule", "target": "dimensions/interface-elements"}}, {"data": {"id": "concepts/identity-rule__dimensions/roles-permissions", "source": "concepts/identity-rule", "target": "dimensions/roles-permissions"}}, {"data": {"id": "concepts/identity-rule__dimensions/solution-variabilities", "source": "concepts/identity-rule", "target": "dimensions/solution-variabilities"}}, {"data": {"id": "concepts/identity-rule__dimensions/business-rules", "source": "concepts/identity-rule", "target": "dimensions/business-rules"}}, {"data": {"id": "concepts/identity-rule__dimensions/domain-entities", "source": "concepts/identity-rule", "target": "dimensions/domain-entities"}}, {"data": {"id": "concepts/identity-rule__dimensions/new-domain-entities", "source": "concepts/identity-rule", "target": "dimensions/new-domain-entities"}}, {"data": {"id": "concepts/identity-rule__dimensions/background-processes", "source": "concepts/identity-rule", "target": "dimensions/background-processes"}}, {"data": {"id": "concepts/identity-rule__dimensions/notifications", "source": "concepts/identity-rule", "target": "dimensions/notifications"}}, {"data": {"id": "concepts/identity-rule__dimensions/audits", "source": "concepts/identity-rule", "target": "dimensions/audits"}}, {"data": {"id": "concepts/identity-rule__dimensions/quality-attributes", "source": "concepts/identity-rule", "target": "dimensions/quality-attributes"}}, {"data": {"id": "concepts/identity-rule__dimensions/security-compliance", "source": "concepts/identity-rule", "target": "dimensions/security-compliance"}}, {"data": {"id": "concepts/identity-rule__dimensions/ux-accessibility", "source": "concepts/identity-rule", "target": "dimensions/ux-accessibility"}}, {"data": {"id": "concepts/nfr-gate__concepts/sizer", "source": "concepts/nfr-gate", "target": "concepts/sizer"}}, {"data": {"id": "concepts/nfr-gate__dimensions/quality-attributes", "source": "concepts/nfr-gate", "target": "dimensions/quality-attributes"}}, {"data": {"id": "concepts/nfr-gate__dimensions/security-compliance", "source": "concepts/nfr-gate", "target": "dimensions/security-compliance"}}, {"data": {"id": "concepts/nfr-gate__dimensions/ux-accessibility", "source": "concepts/nfr-gate", "target": "dimensions/ux-accessibility"}}, {"data": {"id": "concepts/nfr-gate__concepts/element-router", "source": "concepts/nfr-gate", "target": "concepts/element-router"}}, {"data": {"id": "concepts/nfr-gate__concepts/dimension-module", "source": "concepts/nfr-gate", "target": "concepts/dimension-module"}}, {"data": {"id": "concepts/sizer__concepts/complexity-element", "source": "concepts/sizer", "target": "concepts/complexity-element"}}, {"data": {"id": "concepts/sizer__concepts/dimension-module", "source": "concepts/sizer", "target": "concepts/dimension-module"}}, {"data": {"id": "concepts/sizer__concepts/nfr-gate", "source": "concepts/sizer", "target": "concepts/nfr-gate"}}, {"data": {"id": "concepts/sizer__concepts/element-router", "source": "concepts/sizer", "target": "concepts/element-router"}}, {"data": {"id": "dimensions/audits__dimensions/business-rules", "source": "dimensions/audits", "target": "dimensions/business-rules"}}, {"data": {"id": "dimensions/audits__dimensions/domain-entities", "source": "dimensions/audits", "target": "dimensions/domain-entities"}}, {"data": {"id": "dimensions/audits__dimensions/new-domain-entities", "source": "dimensions/audits", "target": "dimensions/new-domain-entities"}}, {"data": {"id": "dimensions/background-processes__dimensions/notifications", "source": "dimensions/background-processes", "target": "dimensions/notifications"}}, {"data": {"id": "dimensions/background-processes__dimensions/domain-entities", "source": "dimensions/background-processes", "target": "dimensions/domain-entities"}}, {"data": {"id": "dimensions/boundaries__dimensions/domain-entities", "source": "dimensions/boundaries", "target": "dimensions/domain-entities"}}, {"data": {"id": "dimensions/boundaries__dimensions/interface-elements", "source": "dimensions/boundaries", "target": "dimensions/interface-elements"}}, {"data": {"id": "dimensions/business-rules__dimensions/roles-permissions", "source": "dimensions/business-rules", "target": "dimensions/roles-permissions"}}, {"data": {"id": "dimensions/business-rules__dimensions/notifications", "source": "dimensions/business-rules", "target": "dimensions/notifications"}}, {"data": {"id": "dimensions/business-rules__dimensions/audits", "source": "dimensions/business-rules", "target": "dimensions/audits"}}, {"data": {"id": "dimensions/business-rules__dimensions/solution-variabilities", "source": "dimensions/business-rules", "target": "dimensions/solution-variabilities"}}, {"data": {"id": "dimensions/domain-entities__dimensions/new-domain-entities", "source": "dimensions/domain-entities", "target": "dimensions/new-domain-entities"}}, {"data": {"id": "dimensions/domain-entities__dimensions/audits", "source": "dimensions/domain-entities", "target": "dimensions/audits"}}, {"data": {"id": "dimensions/interface-elements__dimensions/boundaries", "source": "dimensions/interface-elements", "target": "dimensions/boundaries"}}, {"data": {"id": "dimensions/interface-elements__dimensions/notifications", "source": "dimensions/interface-elements", "target": "dimensions/notifications"}}, {"data": {"id": "dimensions/interface-elements__dimensions/audits", "source": "dimensions/interface-elements", "target": "dimensions/audits"}}, {"data": {"id": "dimensions/new-domain-entities__dimensions/domain-entities", "source": "dimensions/new-domain-entities", "target": "dimensions/domain-entities"}}, {"data": {"id": "dimensions/new-domain-entities__dimensions/interface-elements", "source": "dimensions/new-domain-entities", "target": "dimensions/interface-elements"}}, {"data": {"id": "dimensions/new-domain-entities__dimensions/business-rules", "source": "dimensions/new-domain-entities", "target": "dimensions/business-rules"}}, {"data": {"id": "dimensions/notifications__dimensions/business-rules", "source": "dimensions/notifications", "target": "dimensions/business-rules"}}, {"data": {"id": "dimensions/notifications__dimensions/interface-elements", "source": "dimensions/notifications", "target": "dimensions/interface-elements"}}, {"data": {"id": "dimensions/notifications__dimensions/solution-variabilities", "source": "dimensions/notifications", "target": "dimensions/solution-variabilities"}}, {"data": {"id": "dimensions/quality-attributes__concepts/nfr-gate", "source": "dimensions/quality-attributes", "target": "concepts/nfr-gate"}}, {"data": {"id": "dimensions/quality-attributes__dimensions/security-compliance", "source": "dimensions/quality-attributes", "target": "dimensions/security-compliance"}}, {"data": {"id": "dimensions/quality-attributes__dimensions/ux-accessibility", "source": "dimensions/quality-attributes", "target": "dimensions/ux-accessibility"}}, {"data": {"id": "dimensions/roles-permissions__dimensions/business-rules", "source": "dimensions/roles-permissions", "target": "dimensions/business-rules"}}, {"data": {"id": "dimensions/roles-permissions__dimensions/interface-elements", "source": "dimensions/roles-permissions", "target": "dimensions/interface-elements"}}, {"data": {"id": "dimensions/security-compliance__concepts/nfr-gate", "source": "dimensions/security-compliance", "target": "concepts/nfr-gate"}}, {"data": {"id": "dimensions/security-compliance__dimensions/quality-attributes", "source": "dimensions/security-compliance", "target": "dimensions/quality-attributes"}}, {"data": {"id": "dimensions/security-compliance__dimensions/roles-permissions", "source": "dimensions/security-compliance", "target": "dimensions/roles-permissions"}}, {"data": {"id": "dimensions/security-compliance__dimensions/audits", "source": "dimensions/security-compliance", "target": "dimensions/audits"}}, {"data": {"id": "dimensions/solution-variabilities__dimensions/business-rules", "source": "dimensions/solution-variabilities", "target": "dimensions/business-rules"}}, {"data": {"id": "dimensions/solution-variabilities__dimensions/notifications", "source": "dimensions/solution-variabilities", "target": "dimensions/notifications"}}, {"data": {"id": "dimensions/ux-accessibility__concepts/nfr-gate", "source": "dimensions/ux-accessibility", "target": "concepts/nfr-gate"}}, {"data": {"id": "dimensions/ux-accessibility__dimensions/quality-attributes", "source": "dimensions/ux-accessibility", "target": "dimensions/quality-attributes"}}, {"data": {"id": "dimensions/ux-accessibility__dimensions/interface-elements", "source": "dimensions/ux-accessibility", "target": "dimensions/interface-elements"}}], "bodies": {"concepts/complexity-element": "# Complexity Element\n\nA Complexity Element is one atomic, countable unit of complexity extracted from\na user story. Elements are semantic, not textual \u2014 one sentence may yield\nelements in different [Dimensions](/dimensions/) ([Aspect\nSplitting](#aspect-splitting)), but each aspect of complexity is counted\nexactly once.\n\n## Properties\n\n- **Owned by exactly one Dimension** \u2014 enforced structurally (single enum\n  field), not by prompt etiquette\n- **Extracted once** by the [Element Router](/concepts/element-router.md)\n- **Sized once** by the owning dimension's [Sizer](/concepts/sizer.md)\n- **Immutable dimension assignment** \u2014 no Sizer may reassign\n\n## Aspect Splitting\n\nThe Router may split one sentence into multiple Complexity Elements when it\ncarries distinct aspects:\n\n> \"Only admins can approve refunds over $1,000\"\n\n\u2192 Element A: authorization gate \u2192 [Roles/Permissions](/dimensions/roles-permissions.md)\n\u2192 Element B: threshold condition \u2192 [Business Rules](/dimensions/business-rules.md)\n\nOver-splitting is the failure mode to guard in golden fixtures.\n\n## Relationships\n\n- Routed to exactly one [Dimension](/dimensions/) by the [Element\n  Router](/concepts/element-router.md)\n- Sized by exactly one [Sizer](/concepts/sizer.md)\n- Never dropped \u2014 unclassifiable elements go to an explicit `unclassified`\n  bucket (scored 0)", "concepts/dimension-module": "# Dimension Module\n\nA Dimension Module is the code shape of one [Dimension](/dimensions/)\nimplemented as three pure functions:\n\n1. **`build_variables()`** \u2014 prepares the Jinja2 template variables from\n   routed elements (and optionally domain knowledge)\n2. **`validate()`** \u2014 parses and validates the LLM's structured response\n3. **`score()`** \u2014 applies the decision table to produce a [Dimension Score](#dimension-score)\n\n## Design\n\n- **No LLM I/O** \u2014 the module never calls an LLM. The calculator renders the\n  prompt, calls the provider, feeds the response to `validate()`, then passes\n  the parsed result to `score()`. This separation enables offline replay: raw\n  responses recorded by the stability harness can be re-scored against new\n  decision-table thresholds at zero API cost.\n- **Pure functions** \u2014 deterministic given the same inputs\n- **ADR-0007** \u2014 the Architecture Decision Record that established this pattern\n\n## Dimension Score\n\nThe output of `score()` is an itemized list of per-element\n`(element, size, points, rationale)` plus the subtotal \u2014 never a bare number.\nThis is forced by two invariants:\n\n- **Count preservation** (invariant #5) is only assertable when per-element\n  sizes are visible\n- **NFR Gate** requires a per-element rationale for gated (N/A) requirements\n\n## Relationships\n\n- Implements one [Dimension](/dimensions/)\n- Used by the [Sizer](/concepts/sizer.md) pipeline step\n- Recorded responses feed the stability harness replay corpus", "concepts/element-router": "# Element Router\n\nThe Element Router is the single upstream pass (Step 3.5 in the BCP pipeline)\nthat takes the story plus Step 3 output (broken sections) and emits canonical\n[Complexity Elements](/concepts/complexity-element.md), each tagged with its\none owning [Dimension](/dimensions/).\n\n## Design\n\n- **Runs once** \u2014 before any Sizer\n- **Output is canonical** \u2014 elements are defined here by construction; there\n  is no separate dedup step anywhere\n- **Uses [Identity Rules](/concepts/identity-rule.md)** \u2014 one line per\n  Dimension defining what makes one element distinct\n- **Specificity precedence** \u2014 routes each aspect to the most specific\n  Dimension that claims it\n- **[Business Rules](/dimensions/business-rules.md) is the residual\n  dimension** \u2014 receives conditional logic only when no specific Dimension owns\n  that aspect\n\n## Coverage Guarantee\n\nAn element the Router cannot confidently place goes to an explicit\n`unclassified` bucket (surfaced in output, scored 0), never silently dropped\nand never duplicated into two dimensions.\n\n## Relationships\n\n- Consumes Step 3 output (broken sections)\n- Produces [Complexity Elements](/concepts/complexity-element.md) for all\n  [Sizers](/concepts/sizer.md)\n- Governed by [Identity Rules](/concepts/identity-rule.md) per Dimension", "concepts/identity-rule": "# Identity Rule\n\nAn Identity Rule is the per-[Dimension](/dimensions/) definition of what\nconstitutes one distinct [Complexity Element](/concepts/complexity-element.md).\nIt lives in the [Element Router's](/concepts/element-router.md) extraction\nschema \u2014 one line per Dimension \u2014 so elements are canonical by construction.\nThere is no separate dedup step anywhere.\n\n## Per-Dimension Identity Rules\n\n| Dimension | Identity Rule |\n|-----------|--------------|\n| [Boundaries](/dimensions/boundaries.md) | One element per distinct interaction medium |\n| [Interface Elements](/dimensions/interface-elements.md) | One element per distinct UI component |\n| [Roles/Permissions](/dimensions/roles-permissions.md) | One element per distinct authorization gate |\n| [Solution Variabilities](/dimensions/solution-variabilities.md) | One element per distinct variability axis (not per branch) |\n| [Business Rules](/dimensions/business-rules.md) | One element per distinct conditional logic expression |\n| [Domain Entities](/dimensions/domain-entities.md) | One element per distinct existing entity |\n| [New Domain Entities](/dimensions/new-domain-entities.md) | One element per distinct new entity |\n| [Background Processes](/dimensions/background-processes.md) | One element per distinct background process |\n| [Notifications](/dimensions/notifications.md) | One element per distinct notification event |\n| [Audits](/dimensions/audits.md) | One element per distinct audited entity |\n| [Quality Attributes](/dimensions/quality-attributes.md) | One element per distinct QA requirement |\n| [Security & Compliance](/dimensions/security-compliance.md) | One element per distinct security/compliance requirement |\n| [UX & Accessibility](/dimensions/ux-accessibility.md) | One element per distinct UX/accessibility requirement |\n\n## Specificity Precedence\n\nWhen an aspect could fit multiple Dimensions, the [Element\nRouter](/concepts/element-router.md) applies specificity precedence: the most\nspecific Dimension claims it. [Business\nRules](/dimensions/business-rules.md) is the residual \u2014 it receives conditional\nlogic only when no specific Dimension owns that aspect.", "concepts/maturity-score": "# Maturity Score\n\nEvery BCP result carries a Maturity Score (1\u20135) that indicates how much\nconfidence to place in the complexity estimate. It is derived from story\nquality factors \u2014 not from the counter's performance.\n\n## Scale\n\n| Score | Verdict | Meaning |\n|-------|---------|---------|\n| 5     | reliable | High-specificity story with clear domain context |\n| 4     | reliable | Well-specified story, minor ambiguities |\n| 3     | moderate | Adequately specified; some interpretation needed |\n| 2     | low      | Vague story; significant assumptions required |\n| 1     | low      | Barely specified; estimate is directional only |\n\n## Confidence Verdict\n\nThe verdict gates how stability targets apply:\n\n- **`reliable`** (maturity > 3) \u2014 targets CV < 20% intrinsic, < 25%\n  maturity-dependent\n- **`moderate`** (maturity = 3) \u2014 acceptable variance, no CV target applied\n- **`low`** (maturity < 3) \u2014 surfaced as a warning; expected noisy; reported\n  separately from reliable stories; never tuned against\n\n## Design\n\n- Any element in the `unclassified` bucket caps the verdict at `moderate`\n  (regardless of maturity score)\n- The counter always returns a BCP total \u2014 blocking low-maturity stories is\n  team governance, never the counter's job\n- Stability targets apply only to `reliable` stories\n\n## Relationships\n\n- Included in every [BCP Result](/dimensions/)\n- Affects which stories are included in stability (CV) measurements\n- Unclassified elements degrade the verdict regardless of maturity", "concepts/nfr-gate": "# NFR Gate\n\nThe NFR Gate is the bottom rung of each NFR [Sizer's](/concepts/sizer.md)\ndecision table. It applies to Dimensions\n[11](/dimensions/quality-attributes.md), [12](/dimensions/security-compliance.md),\nand [13](/dimensions/ux-accessibility.md).\n\n## How It Works\n\n1. The [Element Router](/concepts/element-router.md) routes **every** distinct\n   NFR requirement to its dimension \u2014 routing is never gated\n2. The Sizer evaluates each routed element against the decision table\n3. A requirement judged a \"standard expectation\" hits the NFR Gate:\n   - Size: N/A\n   - Points: 0\n   - Rationale: one line explaining why it's standard\n4. Gated requirements stay visible in output for CV tuning\n\n## Standard Expectations\n\nWhat counts as \"standard\" is domain-dependent. Examples:\n\n| NFR Dimension | Standard Expectation |\n|--------------|---------------------|\n| Quality Attributes | \"System is available during business hours\" |\n| Security & Compliance | \"Use HTTPS,\" \"hash passwords\" |\n| UX & Accessibility | \"Form is usable,\" \"buttons have labels\" |\n\n## Design Rationale\n\nGating is a **sizing judgment**, never a routing one. The Router does not\ndecide what's standard \u2014 each Sizer does, via its decision table. This keeps\nthe Router's job simple (extract + classify) and makes gating decisions\nauditable per-element.\n\n## Relationships\n\n- Applied by NFR [Sizers](/concepts/sizer.md) during scoring\n- Standard expectations may be informed by a domain knowledge OKF bundle\n  (future: [Domain Knowledge Input](/dimensions/))\n- Gated elements remain in [Dimension Scores](/concepts/dimension-module.md)\n  for CV measurement", "concepts/sizer": "# Sizer\n\nA Sizer is a per-[Dimension](/dimensions/) step that receives only the\n[Complexity Elements](/concepts/complexity-element.md) routed to its dimension\nand assigns a Size (XS\u2013XXXL, Fibonacci-weighted) and Points to each.\n\n## Constraints\n\n- **Never reads raw story text** \u2014 invariant #2: no re-extraction\n- **Never merges, splits, or drops elements** \u2014 invariant #5: count\n  preservation (output count == input count)\n- **Returns itemized [Dimension\n  Scores](/concepts/dimension-module.md#dimension-score)** \u2014 per-element\n  `(element, size, points, rationale)` plus subtotal, never a bare number\n- **Uses criteria-defined decision tables** \u2014 invariant #6: every Size is\n  defined by countable criteria, not holistic judgment\n\n## NFR Sizers\n\nDimensions [11\u201313](/dimensions/) (Quality Attributes, Security & Compliance,\nUX & Accessibility) have an additional [NFR Gate](/concepts/nfr-gate.md): a\nrequirement judged a standard expectation scores N/A (0 pts) with a one-line\nrationale. Routing happens regardless; gating is sizing-only.\n\n## Relationships\n\n- Receives elements from the [Element Router](/concepts/element-router.md)\n- Implements the [Dimension Module](/concepts/dimension-module.md) pattern\n- Gated by [NFR Gate](/concepts/nfr-gate.md) for NFR dimensions", "dimensions/audits": "# Audits (Dimension 10)\n\nEvery entity requiring an audit trail adds complexity at XS(1) per entity.\nAudit requirements include change logging, user-action tracking, data-lineage\nrecording, and compliance-mandated traceability.\n\n## Identity Rule\n\n**One element per distinct entity requiring audit.** \"Audit all changes to\nOrder and Refund\" = 2 elements. An entity that needs auditing in multiple\ncontexts within the same story counts once.\n\n## Decision Table\n\n| Audited entities | Size | Points |\n|-----------------|------|--------|\n| 0               | N/A  | 0      |\n| 1               | XS   | 1      |\n| 2               | XS   | 2      |\n| 3               | XS   | 3      |\n| 4+              | S    | 2 per entity |\n\nScoring: XS(1) each for up to 3 entities; S(2) each beyond that.\n\n## Examples\n\n**Story:** \"Log all refund state changes. Track who approved each refund. Log\nloyalty-point adjustments.\"\n\n- Element 1: Refund entity audit \u2192 XS \u2192 1\n- Element 2: loyalty-point audit \u2192 XS \u2192 1\n- Who-approved is part of Refund audit (not a separate entity)\n- Count: 2 \u2192 Total 2 points\n\n## Relationships\n\n- Audit-logging conditions route here, not to [Business\n  Rules](/dimensions/business-rules.md) (specificity precedence)\n- The entities being audited score in [Domain\n  Entities](/dimensions/domain-entities.md) or [New Domain\n  Entities](/dimensions/new-domain-entities.md)", "dimensions/background-processes": "# Background Processes (Dimension 8)\n\nEvery distinct asynchronous or scheduled job adds complexity. Background\nprocesses introduce concerns around retry logic, idempotency, monitoring, and\nfailure handling that synchronous code does not.\n\n## Identity Rule\n\n**One element per distinct background process.** A \"send email\" job and a\n\"recalculate analytics\" job are two elements. A single job type triggered by\nmultiple events counts once.\n\n## Decision Table\n\n| Background process complexity              | Size | Points |\n|--------------------------------------------|------|--------|\n| Fire-and-forget (no retry/state)           | M    | 3      |\n| With retry or state tracking                | L    | 5      |\n| Multi-step workflow / saga / orchestration  | XL   | 8      |\n\n## Examples\n\n**Story:** \"After refund is approved, asynchronously update inventory and send\nconfirmation email. If inventory update fails, retry 3 times.\"\n\n- Element 1: inventory update job (with retry) \u2192 L \u2192 5 points\n- Element 2: confirmation email job (fire-and-forget) \u2192 M \u2192 3 points\n- Count: 2 \u2192 Total 8 points\n\n## Relationships\n\n- Background processes often trigger [Notifications](/dimensions/notifications.md)\n  \u2014 the notification itself scores there\n- State-tracking processes may touch [Domain\n  Entities](/dimensions/domain-entities.md) \u2014 the entity scores there", "dimensions/boundaries": "# Boundaries (Dimension 1)\n\nEach distinct external system, service, or interaction medium the story\ntouches adds complexity. A boundary is a crossing point where data or control\nflows between systems.\n\n## Identity Rule\n\n**One element per distinct interaction medium.** A REST API call, a message\nqueue read, a file import, and a database query are each distinct media. Two\ncalls to the same API count as one element (same medium).\n\n## Decision Table\n\n| Count of distinct boundaries | Size | Points |\n|------------------------------|------|--------|\n| 0                            | N/A  | 0      |\n| 1                            | XS   | 1      |\n| 2                            | S    | 2      |\n| 3                            | M    | 3      |\n| 4                            | L    | 5      |\n| 5+                           | XL   | 8      |\n\n## Examples\n\n**Story:** \"Fetch order data from the ERP, validate against the CRM, and push\nto the warehouse system.\"\n\n- Element 1: ERP (REST API) \u2014 boundary\n- Element 2: CRM (REST API) \u2014 boundary\n- Element 3: Warehouse (message queue) \u2014 boundary\n- Count: 3 \u2192 Size M \u2192 3 points\n\n## Relationships\n\n- Crosses boundaries to interact with [Domain Entities](/dimensions/domain-entities.md)\n- Distinct from [Interface Elements](/dimensions/interface-elements.md) (human-facing UI vs system boundaries)", "dimensions/business-rules": "# Business Rules (Dimension 5)\n\nBusiness Rules is the **residual dimension** \u2014 it receives conditional logic\nonly when no specific Dimension claims that aspect. Rules that involve\nauthorization go to [Roles/Permissions](/dimensions/roles-permissions.md);\nnotification-triggering rules go to [Notifications](/dimensions/notifications.md);\naudit-logging rules go to [Audits](/dimensions/audits.md).\n\n## Identity Rule\n\n**One element per distinct conditional logic expression** \u2014 a validation rule,\na transformation rule, or a decision rule. Conditions whose sole job is\nselecting which [Solution Variability](/dimensions/solution-variabilities.md)\npath executes are priced inside the Variability, not here\n(selection-vs-transformation boundary).\n\n## Decision Table\n\n| Rule complexity                        | Size | Points |\n|----------------------------------------|------|--------|\n| Simple validation (required field)     | XS   | 1      |\n| Single-condition rule                  | S    | 2      |\n| Multi-condition rule (AND/OR)          | M    | 3      |\n| Complex rule (nested, dependent)       | L    | 5      |\n| Algorithm / state machine              | XL   | 8      |\n\n## Examples\n\n**Story:** \"Validate that refund amount \u2264 original order total AND order status\nis 'delivered'.\"\n\n- Element 1: amount validation (multi-condition AND) \u2192 M \u2192 3 points\n\n**Story:** \"Only admins can approve refunds over $1,000.\"\n\n- The \"only admins\" aspect routes to [Roles/Permissions](/dimensions/roles-permissions.md)\n- The \"$1,000 threshold\" aspect routes here \u2192 S \u2192 2 points\n\n## Relationships\n\n- **Residual** \u2014 receives only what no specific dimension claims\n- Conditions selecting variability paths belong to\n  [Solution Variabilities](/dimensions/solution-variabilities.md), not here", "dimensions/domain-entities": "# Domain Entities (Dimension 6)\n\nEvery existing domain entity the story interacts with adds complexity. An\nentity is a business concept with identity and lifecycle \u2014 Order, Customer,\nInvoice, Product \u2014 not a database table (though it often maps to one).\n\n## Identity Rule\n\n**One element per distinct existing entity.** An entity is existing if it\nalready exists in the domain model before this story. If the story creates a\nnew entity, that entity scores in [New Domain\nEntities](/dimensions/new-domain-entities.md), not here \u2014 dims 6 and 7 are\n**mutually exclusive per entity**.\n\n## Decision Table\n\n| Existing entities touched | Size | Points |\n|--------------------------|------|--------|\n| 0                        | N/A  | 0      |\n| 1                        | XS   | 1      |\n| 2                        | S    | 2      |\n| 3                        | M    | 3      |\n| 4                        | L    | 5      |\n| 5+                       | XL   | 8      |\n\n## Examples\n\n**Story:** \"Add refund processing that updates the Order status, creates a\nRefund record, and adjusts Customer loyalty points.\"\n\n- Order: existing entity \u2192 dim 6\n- Customer: existing entity \u2192 dim 6\n- Refund: new entity \u2192 dim 7 (not here)\n- Count (dim 6): 2 \u2192 Size S \u2192 2 points\n\n## Relationships\n\n- Mutually exclusive with [New Domain Entities](/dimensions/new-domain-entities.md)\n  per entity \u2014 a new entity scores only in dim 7\n- Entities may be the subject of [Audits](/dimensions/audits.md) \u2014 the audit is\n  a separate element scored in that dimension", "dimensions/interface-elements": "# Interface Elements (Dimension 2)\n\nCounts human-facing UI components the story requires. Elements are classified\nas **Static** (labels, read-only fields, images) or **Dynamic** (inputs,\nbuttons, dropdowns, modals, date pickers).\n\n## Identity Rule\n\n**One element per distinct UI component.** A form with 3 input fields and 1\nbutton = 4 Dynamic elements. A read-only table = 1 Static element.\n\n## Decision Table\n\n| Static count | Size | Points | Dynamic count | Size | Points |\n|-------------|------|--------|--------------|------|--------|\n| 0           | N/A  | 0      | 0            | N/A  | 0      |\n| 1\u20135         | XS   | 1      | 1\u20135          | XS   | 1      |\n| 6\u201310        | S    | 2      | 6\u201310         | S    | 2      |\n| 11\u201315       | M    | 3      | 11\u201315        | M    | 3      |\n| 16\u201320       | L    | 5      | 16\u201320        | L    | 5      |\n| 21+         | XL   | 8      | 21+          | XL   | 8      |\n\nScoring: `ceil(count / 5)` maps count to size bucket. Static and Dynamic are\nscored independently, then summed.\n\n## Examples\n\n**Story:** \"Add a refund form with order ID lookup, refund amount input, reason\ndropdown, and submit button.\"\n\n- Static: 3 (order details display, confirmation message, help text) \u2192 3 \u2264 5 \u2192 XS \u2192 1\n- Dynamic: 4 (order ID field, amount field, reason dropdown, submit button) \u2192 4 \u2264 5 \u2192 XS \u2192 1\n- Total: 2 points\n\n## Relationships\n\n- Distinct from [Boundaries](/dimensions/boundaries.md) (system-facing vs human-facing)\n- UI that triggers [Notifications](/dimensions/notifications.md) or\n  [Audits](/dimensions/audits.md) \u2014 those dimensions score the notification/audit,\n  not Interface Elements", "dimensions/new-domain-entities": "# New Domain Entities (Dimension 7)\n\nEvery new domain entity the story introduces adds complexity. Creating an\nentity is inherently more complex than touching an existing one \u2014 it requires\ndefining structure, validation, persistence, and lifecycle.\n\n## Identity Rule\n\n**One element per distinct new entity.** An entity is \"new\" if this story\nintroduces it to the domain model. Even if the story also reads/validates/\npersists the new entity, it scores only here \u2014 dim 7's higher floor (M)\nalready prices in the full creation cost.\n\n## Decision Table\n\n| New entities created | Size | Points |\n|---------------------|------|--------|\n| 0                   | N/A  | 0      |\n| 1                   | M    | 3      |\n| 2                   | L    | 5      |\n| 3+                  | XL   | 8      |\n\nNote the higher floor: even a single new entity starts at M(3), reflecting the\ninherent cost of introducing structure, validation, and lifecycle.\n\n## Examples\n\n**Story:** \"Add refund processing that updates the Order status, creates a\nRefund record, and adjusts Customer loyalty points.\"\n\n- Refund: new entity \u2192 dim 7 \u2192 M \u2192 3 points\n- Order, Customer: existing \u2192 dim 6 (not here)\n\n## Relationships\n\n- Mutually exclusive with [Domain Entities](/dimensions/domain-entities.md)\n  per entity \u2014 an entity is either existing or new, never both\n- New entities often require new [Interface\n  Elements](/dimensions/interface-elements.md) and [Business\n  Rules](/dimensions/business-rules.md) \u2014 those are separate elements", "dimensions/notifications": "# Notifications (Dimension 9)\n\nEvery distinct notification event \u2014 an outbound message to a user or external\nsystem triggered by story behavior \u2014 adds complexity at XS(1) per event.\n\n## Identity Rule\n\n**One element per distinct notification event.** \"Send email on approval AND\nsend email on rejection\" = 2 elements (two distinct events, even if same\nchannel). \"Notify via email and SMS for the same event\" = 2 elements (two\nchannels). A notification template with variable content counts once.\n\n## Decision Table\n\n| Notification events | Size | Points |\n|---------------------|------|--------|\n| 0                   | N/A  | 0      |\n| 1                   | XS   | 1      |\n| 2                   | XS   | 2      |\n| 3                   | XS   | 3      |\n| 4+                  | S    | 2 per event |\n\nScoring: XS(1) each for up to 3 events; S(2) each beyond that.\n\n## Examples\n\n**Story:** \"Send email confirmation on refund approval. Send email on refund\nrejection with reason. Notify admin via Slack for refunds over $1,000.\"\n\n- Element 1: approval confirmation email \u2192 XS \u2192 1\n- Element 2: rejection email \u2192 XS \u2192 1\n- Element 3: admin Slack notification \u2192 XS \u2192 1\n- Count: 3 \u2192 Total 3 points\n\n## Relationships\n\n- Notification-triggering conditions route here, not to [Business\n  Rules](/dimensions/business-rules.md) (specificity precedence)\n- The UI that triggers the notification scores in [Interface\n  Elements](/dimensions/interface-elements.md)\n- Choice of notification channel (variability) scores in [Solution\n  Variabilities](/dimensions/solution-variabilities.md)", "dimensions/quality-attributes": "# Quality Attributes (Dimension 11)\n\nCounts Non-Functional Requirements related to system qualities \u2014\nperformance, reliability, scalability, availability, maintainability,\nobservability \u2014 but only when they **exceed standard expectations**.\n\n## Identity Rule\n\n**One element per distinct quality attribute requirement.** \"Response time\n< 200ms AND 99.9% uptime\" = 2 elements. Each NFR is routed regardless; the\n[NFR Gate](/concepts/nfr-gate.md) decides at sizing time whether it scores.\n\n## Decision Table\n\n| QA requirement scope              | Size | Points |\n|-----------------------------------|------|--------|\n| Standard expectation (table stakes)| N/A  | 0      |\n| Modest above standard             | XS   | 1      |\n| Significant above standard        | S    | 2      |\n| Demanding                          | M    | 3      |\n| Highly demanding                   | L    | 5      |\n| Extreme / unprecedented           | XL   | 8      |\n\n**Standard expectation examples:** \"The page should load,\" \"the system should\nbe available during business hours,\" \"errors should be logged.\"\n\n## NFR Gate\n\nA requirement judged a standard expectation scores N/A (0 points) with a\none-line rationale. The Router routes every distinct NFR requirement\nregardless \u2014 gating is a sizing judgment, never a routing one. Gated\nrequirements stay visible in output for CV tuning.\n\n## Examples\n\n**Story:** \"Refund processing must complete within 2 seconds. The system must\nhandle 10,000 refunds/hour during peak.\"\n\n- Element 1: latency SLA (2s) \u2192 above standard for refund processing \u2192 S \u2192 2\n- Element 2: throughput (10K/hr) \u2192 above standard \u2192 S \u2192 2\n- Total: 4 points\n\n## Relationships\n\n- NFR requirements that also relate to security go to [Security &\n  Compliance](/dimensions/security-compliance.md)\n- NFR requirements about user interaction go to [UX &\n  Accessibility](/dimensions/ux-accessibility.md)", "dimensions/roles-permissions": "# Roles / Permissions (Dimension 3)\n\nEvery distinct authorization concern adds complexity. This includes role-based\naccess checks, permission gates, and access-control conditions \u2014 even when\nexpressed implicitly (\"only admins can\u2026\", \"restricted to managers\").\n\n## Identity Rule\n\n**One element per distinct authorization gate.** \"Only admins and managers\"\n= 2 elements (two roles checked). \"Only authenticated users\" = 1 element (one\ngate). A role checked in multiple places within the same story counts once.\n\n## Decision Table\n\n| Distinct authorization gates | Size | Points |\n|------------------------------|------|--------|\n| 0                            | N/A  | 0      |\n| 1                            | S    | 2      |\n| 2                            | M    | 3      |\n| 3+                           | L    | 5      |\n\n## Examples\n\n**Story:** \"Only admins can approve refunds; managers can view all refunds;\nagents can only view their own.\"\n\n- Element 1: admin approval gate \u2192 1 gate\n- Element 2: manager view gate \u2192 1 gate\n- Element 3: agent scope restriction \u2192 1 gate\n- Count: 3 \u2192 Size L \u2192 5 points\n\n## Relationships\n\n- Authorization conditions route here, not to [Business\n  Rules](/dimensions/business-rules.md) (specificity precedence)\n- Role-based UI visibility: the UI element counts in [Interface\n  Elements](/dimensions/interface-elements.md); the permission check counts here", "dimensions/security-compliance": "# Security & Compliance (Dimension 12)\n\nCounts Non-Functional Requirements related to security and regulatory\ncompliance \u2014 authentication, authorization architecture, encryption, data\nprotection, audit compliance, regulatory frameworks (GDPR, PCI-DSS, SOC2,\nHIPAA) \u2014 but only when they **exceed standard expectations**.\n\n## Identity Rule\n\n**One element per distinct security or compliance requirement.** \"Encrypt data\nat rest AND mask PII in logs\" = 2 elements. Even implicit requirements (\"this\nhandles payment data\" implies PCI-DSS) count as elements. Each NFR is routed\nregardless; the [NFR Gate](/concepts/nfr-gate.md) decides at sizing time.\n\n## Decision Table\n\n| Security / Compliance scope       | Size | Points |\n|-----------------------------------|------|--------|\n| Standard expectation              | N/A  | 0      |\n| Modest above standard             | XS   | 1      |\n| Significant above standard        | S    | 2      |\n| Demanding                          | M    | 3      |\n| Highly demanding                   | L    | 5      |\n| Extreme / regulatory-mandated     | XL   | 8      |\n\n**Standard expectation examples:** \"Use HTTPS,\" \"hash passwords,\" \"log access\nattempts.\" **Above standard:** \"Field-level encryption for PII,\" \"PCI-DSS\nLevel 1 compliance,\" \"SOC2 Type II audit trail.\"\n\n## NFR Gate\n\nSame gating semantics as [Quality Attributes](/dimensions/quality-attributes.md):\nstandard expectations score N/A (0 pts). The Router routes every distinct\nrequirement; gating is sizing-only. Regulatory-mandated requirements (PCI-DSS,\nGDPR) typically score above standard by default.\n\n## Examples\n\n**Story:** \"Refund processing must encrypt PII at rest and in transit.\nPCI-DSS Level 1 compliance required for payment data handling.\"\n\n- Element 1: PII encryption (at rest + in transit) \u2192 above standard \u2192 S \u2192 2\n- Element 2: PCI-DSS L1 compliance \u2192 regulatory-mandated \u2192 XL \u2192 8\n- Total: 10 points\n\n## Relationships\n\n- Authorization logic (who can do what) scores in [Roles /\n  Permissions](/dimensions/roles-permissions.md) \u2014 Security & Compliance is\n  about architectural security properties, not business authorization rules\n- Compliance-mandated audits may trigger [Audits](/dimensions/audits.md)\n  elements \u2014 those score separately", "dimensions/solution-variabilities": "# Solution Variabilities (Dimension 4)\n\nEach distinct axis of alternative solution behavior adds complexity. A\nvariability is a dimension of choice \u2014 payment method, shipping provider,\nnotification channel \u2014 where the system branches.\n\n## Identity Rule\n\n**One element per distinct variability axis, not per branch.** \"Payment by\ncredit card, PayPal, or bank transfer\" = 1 element (payment-method axis), not\n3. Conditions whose sole job is selecting which path executes are priced inside\nthe Variability; conditions that validate or transform within a path are\n[Business Rules](/dimensions/business-rules.md) (selection-vs-transformation\nboundary).\n\n## Decision Table\n\n| Variability axes | Size | Points |\n|-----------------|------|--------|\n| 0               | N/A  | 0      |\n| 1               | S    | 2      |\n| 2               | M    | 3      |\n| 3               | L    | 5      |\n| 4+              | XL   | 8      |\n\n## Examples\n\n**Story:** \"Support refunds via original payment method (credit card, PayPal)\nor store credit.\"\n\n- Element 1: refund-method axis (credit card / PayPal / store credit) \u2192 1 axis \u2192 S \u2192 2 points\n\n**Story:** \"Notify users via email, SMS, or push based on preference; process\npayment via Stripe or Braintree based on region.\"\n\n- Element 1: notification-channel axis \u2192 1 axis\n- Element 2: payment-gateway axis \u2192 1 axis\n- Count: 2 \u2192 Size M \u2192 3 points\n\n## Relationships\n\n- Path-selection conditions belong here; path-internal validation belongs to\n  [Business Rules](/dimensions/business-rules.md)\n- Variability in notification channels does NOT double-count with\n  [Notifications](/dimensions/notifications.md) \u2014 the notification itself scores\n  there; the choice-of-channel scores here", "dimensions/ux-accessibility": "# UX & Accessibility (Dimension 13)\n\nCounts Non-Functional Requirements related to user experience and\naccessibility \u2014 usability standards, localization/internationalization,\nWCAG compliance, assistive-technology support, UX complexity beyond basic\nform design \u2014 but only when they **exceed standard expectations**.\n\n## Identity Rule\n\n**One element per distinct UX or accessibility requirement.** \"WCAG 2.1 AA\ncompliance AND RTL language support AND screen-reader optimization\" = 3\nelements. Each NFR is routed regardless; the [NFR\nGate](/concepts/nfr-gate.md) decides at sizing time.\n\n## Decision Table\n\n| UX / Accessibility scope           | Size | Points |\n|------------------------------------|------|--------|\n| Standard expectation               | N/A  | 0      |\n| Modest above standard              | XS   | 1      |\n| Significant above standard         | S    | 2      |\n| Demanding                           | M    | 3      |\n| Highly demanding                    | L    | 5      |\n| Extreme / full certification       | XL   | 8      |\n\n**Standard expectation examples:** \"The form should be usable,\" \"buttons should\nhave labels,\" \"the page should be responsive.\" **Above standard:** \"WCAG 2.1\nAA compliance,\" \"support for 5 languages with RTL,\" \"screen-reader-optimized\nnavigation,\" \"keyboard-only operation for all workflows.\"\n\n## NFR Gate\n\nSame gating semantics as [Quality Attributes](/dimensions/quality-attributes.md):\nstandard expectations score N/A (0 pts). Basic usability is table stakes;\nformal accessibility standards, localization, and specialized UX patterns\nscore.\n\n## Examples\n\n**Story:** \"Refund form must support WCAG 2.1 AA. RTL layout for Arabic\nlocale. Keyboard-navigable refund workflow.\"\n\n- Element 1: WCAG 2.1 AA \u2192 above standard \u2192 S \u2192 2\n- Element 2: RTL support \u2192 above standard \u2192 S \u2192 2\n- Element 3: keyboard navigation \u2192 above standard \u2192 S \u2192 2\n- Total: 6 points\n\n## Relationships\n\n- The form UI itself scores in [Interface\n  Elements](/dimensions/interface-elements.md) \u2014 UX & Accessibility captures\n  the NFR layer on top\n- Accessibility affecting all interfaces (not just one form) is a single\n  element here, not per-interface"}, "types": ["Concept", "Dimension"], "palette": {"Methodology": "#ef4444", "Dimension": "#3b82f6", "Concept": "#10b981"}};
+</script>
+<script>
+(function () {
+  const bundle = window.BUNDLE;
+  const bundleName = window.BUNDLE_NAME;
+  document.title = `${bundleName} — OKF Viewer`;
+  document.getElementById("bundle-name").textContent = bundleName;
+
+  // Populate type filter
+  const typeSelect = document.getElementById("filter-type");
+  for (const t of bundle.types) {
+    const opt = document.createElement("option");
+    opt.value = t;
+    opt.textContent = t;
+    typeSelect.appendChild(opt);
+  }
+
+  // Build reverse-link index for backlinks
+  const backlinks = {};
+  for (const edge of bundle.edges) {
+    const { source, target } = edge.data;
+    (backlinks[target] ||= []).push(source);
+  }
+
+  // Look up node label/type by id
+  const nodeIndex = {};
+  for (const n of bundle.nodes) nodeIndex[n.data.id] = n.data;
+
+  const cy = cytoscape({
+    container: document.getElementById("graph"),
+    elements: [...bundle.nodes, ...bundle.edges],
+    style: [
+      {
+        selector: "node",
+        style: {
+          "background-color": "data(color)",
+          "label": "data(label)",
+          "color": "#0f172a",
+          "font-size": 11,
+          "text-valign": "bottom",
+          "text-margin-y": 4,
+          "text-wrap": "wrap",
+          "text-max-width": 120,
+          "width": "data(size)",
+          "height": "data(size)",
+          "border-width": 1,
+          "border-color": "#0f172a",
+        },
+      },
+      {
+        selector: "node:selected",
+        style: {
+          "border-width": 3,
+          "border-color": "#f59e0b",
+        },
+      },
+      {
+        selector: "edge",
+        style: {
+          "width": 1.5,
+          "line-color": "#cbd5e1",
+          "target-arrow-color": "#cbd5e1",
+          "target-arrow-shape": "triangle",
+          "curve-style": "bezier",
+          "arrow-scale": 0.9,
+        },
+      },
+      {
+        selector: "edge:selected",
+        style: {
+          "line-color": "#f59e0b",
+          "target-arrow-color": "#f59e0b",
+          "width": 2.5,
+        },
+      },
+      {
+        selector: ".dim",
+        style: { "opacity": 0.15 },
+      },
+    ],
+    layout: { name: "cose", animate: false, padding: 30 },
+    wheelSensitivity: 0.2,
+  });
+
+  cy.on("tap", "node", (evt) => showDetail(evt.target.id()));
+  cy.on("tap", (evt) => {
+    if (evt.target === cy) clearSelection();
+  });
+
+  document.getElementById("layout").addEventListener("change", (e) => {
+    cy.layout({ name: e.target.value, animate: false, padding: 30 }).run();
+  });
+
+  document.getElementById("reset").addEventListener("click", () => {
+    cy.fit(null, 30);
+    clearSelection();
+  });
+
+  document.getElementById("search").addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) {
+      cy.elements().removeClass("dim");
+      return;
+    }
+    cy.nodes().forEach((n) => {
+      const d = n.data();
+      const hay =
+        (d.label || "").toLowerCase() + " " +
+        d.id.toLowerCase() + " " +
+        (d.tags || []).join(" ").toLowerCase();
+      n.toggleClass("dim", !hay.includes(q));
+    });
+    cy.edges().forEach((edge) => {
+      const src = edge.source();
+      const tgt = edge.target();
+      edge.toggleClass("dim", src.hasClass("dim") || tgt.hasClass("dim"));
+    });
+  });
+
+  document.getElementById("filter-type").addEventListener("change", (e) => {
+    const t = e.target.value;
+    if (!t) {
+      cy.elements().removeClass("dim");
+      return;
+    }
+    cy.nodes().forEach((n) => {
+      n.toggleClass("dim", n.data("type") !== t);
+    });
+    cy.edges().forEach((edge) => {
+      edge.toggleClass("dim", edge.source().hasClass("dim") || edge.target().hasClass("dim"));
+    });
+  });
+
+  function clearSelection() {
+    cy.elements().unselect();
+    document.getElementById("detail-empty").hidden = false;
+    document.getElementById("detail-content").hidden = true;
+  }
+
+  function showDetail(conceptId) {
+    const data = nodeIndex[conceptId];
+    if (!data) return;
+    cy.elements().unselect();
+    const node = cy.getElementById(conceptId);
+    if (node) node.select();
+
+    document.getElementById("detail-empty").hidden = true;
+    const content = document.getElementById("detail-content");
+    content.hidden = false;
+
+    const chip = document.getElementById("detail-type");
+    chip.textContent = data.type;
+    chip.style.background = data.color;
+
+    document.getElementById("detail-title").textContent = data.label;
+    document.getElementById("detail-id").textContent = conceptId;
+    document.getElementById("detail-description").textContent = data.description || "—";
+
+    const resourceEl = document.getElementById("detail-resource");
+    resourceEl.innerHTML = "";
+    if (data.resource) {
+      const a = document.createElement("a");
+      a.href = data.resource;
+      a.textContent = data.resource;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.className = "external";
+      resourceEl.appendChild(a);
+    } else {
+      resourceEl.textContent = "—";
+    }
+
+    const tagsEl = document.getElementById("detail-tags");
+    tagsEl.innerHTML = "";
+    if (data.tags && data.tags.length) {
+      for (const t of data.tags) {
+        const span = document.createElement("span");
+        span.className = "tag";
+        span.textContent = t;
+        tagsEl.appendChild(span);
+      }
+    } else {
+      tagsEl.textContent = "—";
+    }
+
+    const body = bundle.bodies[conceptId] || "";
+    const html = marked.parse(body, { breaks: false, gfm: true });
+    const bodyEl = document.getElementById("detail-body");
+    bodyEl.innerHTML = html;
+    rewriteInternalLinks(bodyEl);
+
+    const bl = backlinks[conceptId] || [];
+    const blSection = document.getElementById("detail-backlinks");
+    const blList = document.getElementById("backlinks-list");
+    blList.innerHTML = "";
+    if (bl.length) {
+      blSection.hidden = false;
+      for (const src of bl) {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.textContent = nodeIndex[src]?.label || src;
+        a.dataset.target = src;
+        a.addEventListener("click", () => showDetail(src));
+        li.appendChild(a);
+        const muted = document.createElement("span");
+        muted.className = "muted";
+        muted.textContent = ` (${src})`;
+        li.appendChild(muted);
+        blList.appendChild(li);
+      }
+    } else {
+      blSection.hidden = true;
+    }
+
+    cy.animate({ center: { eles: node }, zoom: Math.max(cy.zoom(), 1.0) }, { duration: 200 });
+  }
+
+  function rewriteInternalLinks(root) {
+    root.querySelectorAll("a[href]").forEach((a) => {
+      const href = a.getAttribute("href");
+      if (!href) return;
+      if (href.startsWith("/") && href.endsWith(".md")) {
+        const target = href.slice(1, -3);
+        if (nodeIndex[target]) {
+          a.className = "internal";
+          a.setAttribute("href", "javascript:void(0)");
+          a.addEventListener("click", (e) => {
+            e.preventDefault();
+            showDetail(target);
+          });
+          return;
+        }
+      }
+      a.className = "external";
+      a.setAttribute("target", "_blank");
+      a.setAttribute("rel", "noopener");
+    });
+  }
+
+  // Auto-show the first node (a dataset if available, else first concept)
+  const initial =
+    bundle.nodes.find((n) => n.data.type === "BigQuery Dataset") ||
+    bundle.nodes[0];
+  if (initial) showDetail(initial.data.id);
+})();
+
+</script>
+</body>
+</html>
