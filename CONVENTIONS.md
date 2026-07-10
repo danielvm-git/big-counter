@@ -5,13 +5,13 @@
 
 ## Git & Workflow
 
-- **Never push directly to main/master** — always use feature branches and PRs.
+- **Workflow mode: solo-git** — direct commits to `main` are permitted. Pre-commit hooks (black, isort, mypy, pytest) enforce quality gates before every commit. If the project transitions to a team, switch to feature branches + PRs.
 - **All commits must follow Conventional Commits:** `<type>(<scope>): <description>`
   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf`, `ci`, `build`.
   - Breaking changes MUST include `BREAKING CHANGE:` footer.
   - Example: `feat(api): add BPC scoring endpoint`
-- **Worktrees over branches** — use `kickoff-branch` skill to create isolated worktrees.
-- **One commit per logical change** — squash before merging.
+- **Worktrees over branches** — use `kickoff-branch` skill to create isolated worktrees for multi-step features.
+- **One commit per logical change** — squash before merging (if using branches).
 
 ## Code Standards
 
