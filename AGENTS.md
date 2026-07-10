@@ -1,4 +1,4 @@
-# BCP Agent — OpenCode
+# BCP Agent — AI Agents
 
 Read CONVENTIONS.md before any GitHub or git operation.
 
@@ -33,6 +33,29 @@ MCP Server receives requests via the Model Context Protocol, delegates to the BP
 - Never refactor, rename, or reorganize code outside the task scope
 - All commits must follow Conventional Commits
 - Never skip tests or type checking
+
+## CI
+Workflows live in `.github/workflows/`. CI runs on push/PR to `main`:
+- Python 3.10 + 3.12 matrix
+- black --check, isort --check-only, mypy src/ (hard gate), pytest
+
+| Failure | Cause | Fix |
+|---------|-------|-----|
+| `black` fails | Unformatted code | `black .` locally before pushing |
+| `isort` fails | Import order wrong | `isort .` locally before pushing |
+| `mypy` shows errors | Type errors in source files | Fix type annotations; CI is a hard gate |
+| `pytest` fails | Test regression | Run `pytest tests/unit/` locally |
+| `act` not found | Docker not running or act not installed | `brew install act && docker ps` |
+| ModuleNotFoundError | Missing `src/` on PYTHONPATH | CI uses `pytest` which reads `conftest.py` adding `src/` |
+
+## Observability
+| What | Command |
+|------|---------|
+| Run tests | `venv/bin/python -m pytest tests/unit/ -v` |
+| Health check | `PYTHONPATH=src venv/bin/python -c "from bcp import BCPCalculator, setup_logger; print('OK')"` |
+| Check deps | `venv/bin/pip check` |
+| View logs (JSON) | `PYTHONPATH=src venv/bin/python -c "from bcp.logger import setup_logger; l=setup_logger(json_format=True); l.info('test')"` |
+| View logs (text) | `venv/bin/python run_cli.py tests/data/story1.md --log-level DEBUG 2>&1 \| head` |
 
 ## Agent Rules
 - **Workflow Mandate:** You MUST use the bigpowers skills (e.g. `plan-work`, `develop-tdd`, `orchestrate-project`) to perform tasks. DO NOT write code directly in response to a user prompt like "build this feature".
