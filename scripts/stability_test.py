@@ -59,14 +59,18 @@ def main():
     csv_rows = []
     csv_header = ["story"]
     for i in range(args.executions):
-        csv_header += [f"story_category_{i+1}"]
+        csv_header += [f"story_category_{i + 1}"]
         csv_header += [
-            f"business_exec_{i+1}",
-            f"interface_exec_{i+1}",
-            f"integration_exec_{i+1}",
-            f"total_bcp_exec_{i+1}",
+            f"business_exec_{i + 1}",
+            f"interface_exec_{i + 1}",
+            f"integration_exec_{i + 1}",
+            f"total_bcp_exec_{i + 1}",
         ]
-        csv_header += [f"business_rules_{i+1}", f"interface_elements_{i+1}", f"boundaries_{i+1}"]
+        csv_header += [
+            f"business_rules_{i + 1}",
+            f"interface_elements_{i + 1}",
+            f"boundaries_{i + 1}",
+        ]
 
     output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
     os.makedirs(output_path, exist_ok=True)
@@ -79,13 +83,13 @@ def main():
 
         try:
             # Read story content
-            with open(story_path, "r", encoding="utf-8") as file:
+            with open(story_path, encoding="utf-8") as file:
                 story_content = file.read()
 
             results_list = []
 
             for i in range(args.executions):
-                logger.info(f"Execution {i+1}/{args.executions} for {story_file}")
+                logger.info(f"Execution {i + 1}/{args.executions} for {story_file}")
                 # Calculate BCP
                 results = calculator.calculate_bcp(story_content)
                 results_list.append(results)

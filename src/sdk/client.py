@@ -6,9 +6,8 @@ This module provides a Python client for the BCP Calculator.
 
 import json
 import logging
-import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from dotenv import load_dotenv
 
@@ -34,7 +33,7 @@ class BCPClient:
         self.logger = setup_logger(self.log_level)
         self.calculator = BCPCalculator(self.logger, provider_name=self.provider)
 
-    def calculate(self, story_content: str) -> Dict[str, Any]:
+    def calculate(self, story_content: str) -> dict[str, Any]:
         """
         Calculate BCP for a user story.
 
@@ -46,7 +45,7 @@ class BCPClient:
         """
         return self.calculator.calculate_bcp(story_content)
 
-    def calculate_file(self, file_path: Union[str, Path]) -> Dict[str, Any]:
+    def calculate_file(self, file_path: str | Path) -> dict[str, Any]:
         """
         Calculate BCP for a user story file.
 
@@ -60,17 +59,17 @@ class BCPClient:
         if not path.exists():
             raise FileNotFoundError(f"Story file not found: {file_path}")
 
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             story_content = f.read()
 
         return self.calculate(story_content)
 
     def batch_calculate(
         self,
-        stories_dir: Union[str, Path],
-        output_path: Optional[Union[str, Path]] = None,
+        stories_dir: str | Path,
+        output_path: str | Path | None = None,
         file_pattern: str = "*.md",
-    ) -> Dict[str, Dict[str, Any]]:
+    ) -> dict[str, dict[str, Any]]:
         """
         Calculate BCP for multiple user story files in a directory.
 
@@ -105,8 +104,8 @@ class BCPClient:
         return results
 
     def compare_providers(
-        self, story_content: str, providers: Optional[List[str]] = None
-    ) -> Dict[str, Dict[str, Any]]:
+        self, story_content: str, providers: list[str] | None = None
+    ) -> dict[str, dict[str, Any]]:
         """
         Compare BCP calculations between different providers.
 

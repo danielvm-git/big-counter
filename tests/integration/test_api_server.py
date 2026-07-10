@@ -1,9 +1,6 @@
-import logging
-
 import pytest
 from fastapi.testclient import TestClient
 
-from bcp.logger import setup_logger
 from src.api.server import app, jobs, process_bcp_calculation
 
 
@@ -48,7 +45,6 @@ def test_calculate_and_status(monkeypatch):
 
 def test_background_task_success(monkeypatch, clear_jobs):
     """Test process_bcp_calculation directly with a mocked calculator."""
-    from tests.conftest import FakePromptHandler
 
     class FakeCalc:
         def __init__(self, logger, provider_name="openai", prompt_handler=None):

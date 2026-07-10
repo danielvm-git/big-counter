@@ -8,8 +8,7 @@ of user stories using a series of predefined prompts and GPT-4o.
 import json
 import logging
 import math
-import os
-from typing import Any, Dict, List, TypedDict
+from typing import Any, TypedDict
 
 from .logger import StepLogger
 from .prompt_handler import PromptHandler
@@ -85,7 +84,7 @@ class BCPCalculator:
             },
         ]
 
-    def calculate_bcp(self, story_content: str) -> Dict[str, Any]:
+    def calculate_bcp(self, story_content: str) -> dict[str, Any]:
         """
         Calculate the Business Complexity Points (BCP) for a user story.
 
@@ -119,7 +118,8 @@ class BCPCalculator:
 
                 # For steps 4-6, we need the output from step 3
                 if step["name"] == "External Integrations Complexity" and elements:
-                    # Extract all instances from elements['Integrations (Boundaries)'] and set as comma-separated string
+                    # Extract all instances from elements['Integrations (Boundaries)']
+                    # and set as comma-separated string
                     variables["elements"] = ""
                     if isinstance(elements, dict) and "Integrations (Boundaries)" in elements:
                         boundaries = elements["Integrations (Boundaries)"]
@@ -197,7 +197,7 @@ class BCPCalculator:
                 # Process the prompt, if response is not set
                 if not response:
                     response = self.prompt_handler.process_prompt(step["prompt_file"], variables)
-                step_logger.info(f"Step completed successfully")
+                step_logger.info("Step completed successfully")
 
                 # Store the result
                 results["steps"][step_name] = response
@@ -293,7 +293,8 @@ class BCPCalculator:
 
         Args:
             elements_text: The text containing all elements
-            section_number: The section number to extract (1=Business Rules, 2=Interface, 3=External)
+            section_number: The section to extract
+                (1=Business Rules, 2=Interface, 3=External)
 
         Returns:
             The extracted section text

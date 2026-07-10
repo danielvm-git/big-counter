@@ -5,7 +5,6 @@ Test script for LLM providers integration.
 
 import argparse
 import logging
-import os
 
 from dotenv import load_dotenv
 

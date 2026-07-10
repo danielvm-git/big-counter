@@ -209,5 +209,6 @@ __marimo__/
 # Tests
 tests/output/
 tests/data/ignore/
-# Ctxo local cache (never committed)
-.ctxo/.cache/
+# Tool caches (never committed)
+.ctxo/
+.gemini/

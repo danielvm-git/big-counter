@@ -3,9 +3,8 @@ FastAPI server for the BCP Calculator API.
 """
 
 import logging
-import os
 import uuid
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 
@@ -32,7 +31,7 @@ def read_root():
     }
 
 
-@app.post("/calculate", response_model=Dict[str, str])
+@app.post("/calculate", response_model=dict[str, str])
 def calculate_bcp(story: StoryRequest, background_tasks: BackgroundTasks):
     """Start BCP calculation job."""
     job_id = str(uuid.uuid4())

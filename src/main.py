@@ -11,7 +11,7 @@ import json
 import logging
 import os
 import sys
-from typing import Any, Dict
+from typing import Any
 
 from dotenv import load_dotenv
 
@@ -60,7 +60,7 @@ def read_story_file(file_path: str, logger: logging.Logger) -> str:
 
     # Read story content
     try:
-        with open(file_path, "r", encoding="utf-8") as file:
+        with open(file_path, encoding="utf-8") as file:
             return file.read()
     except Exception as e:
         logger.error(f"Error reading story file: {str(e)}")
@@ -69,7 +69,7 @@ def read_story_file(file_path: str, logger: logging.Logger) -> str:
 
 def calculate_bcp_for_story(
     story_content: str, provider: str, logger: logging.Logger
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Calculate BCP for a given story."""
     try:
         # Initialize BCP calculator with selected provider
@@ -83,7 +83,7 @@ def calculate_bcp_for_story(
 
 
 def save_or_print_results(
-    results: Dict[str, Any],
+    results: dict[str, Any],
     output_format: str,
     output_file: str | None = None,
     logger: logging.Logger | None = None,
@@ -131,7 +131,7 @@ def main():
     save_or_print_results(results, args.format, args.output_file, logger)
 
 
-def format_results_json(results: Dict[str, Any]) -> str:
+def format_results_json(results: dict[str, Any]) -> str:
     """Format the results as JSON."""
     # Create a structured JSON output
     json_output = {
@@ -171,7 +171,7 @@ def format_results_json(results: Dict[str, Any]) -> str:
     return json.dumps(json_output, indent=2, ensure_ascii=False)
 
 
-def format_results_text(results: Dict[str, Any]) -> str:
+def format_results_text(results: dict[str, Any]) -> str:
     """Format the results as text (legacy format)."""
     output = []
 

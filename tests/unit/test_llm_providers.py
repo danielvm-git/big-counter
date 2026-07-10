@@ -41,7 +41,7 @@ def test_get_provider_flow_mapping(logger, monkeypatch):
     monkeypatch.setattr("bcp.llm_providers.FlowProvider", DummyFlow)
     monkeypatch.setattr("bcp.llm_providers.FlowBedrockProvider", DummyBedrock)
 
-    p = get_provider("flow-openai", logger)
+    _ = get_provider("flow-openai", logger)
     assert constructed["flow"] is True
-    p = get_provider("flow-bedrock", logger)
+    _ = get_provider("flow-bedrock", logger)
     assert constructed["bedrock"] is True

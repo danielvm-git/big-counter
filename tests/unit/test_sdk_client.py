@@ -1,12 +1,9 @@
 """Tests for SDK client — mocked BCPCalculator to avoid live API dependencies."""
 
 import json
-import logging
-from pathlib import Path
 
 import pytest
 
-from bcp.logger import setup_logger
 from src.sdk.client import BCPClient
 
 

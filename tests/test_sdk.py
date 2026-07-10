@@ -7,10 +7,7 @@ This script demonstrates three different ways to use the BCP Calculator:
 3. API usage via HTTP requests
 """
 
-import json
 import logging
-import os
-from pathlib import Path
 
 from bcp.bcp_calculator import BCPCalculator
 from bcp.logger import setup_logger

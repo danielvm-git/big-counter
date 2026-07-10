@@ -1,8 +1,6 @@
 import os
 import sys
 
-import pytest
-
 # Ensure repository root and 'src' directory are on sys.path for package imports during tests
 TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(TESTS_DIR)

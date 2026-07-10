@@ -8,12 +8,11 @@ import json
 import logging
 import os
 import re
-from typing import Any, Dict, Optional
+from typing import Any
 
 from jinja2 import Template
-from langchain_core.output_parsers import StrOutputParser
 
-from .llm_providers import LLMProvider, get_provider
+from .llm_providers import get_provider
 
 
 class PromptHandler:
@@ -50,13 +49,13 @@ class PromptHandler:
         self.logger.debug(f"Loading prompt from {prompt_path}")
 
         try:
-            with open(prompt_path, "r", encoding="utf-8") as file:
+            with open(prompt_path, encoding="utf-8") as file:
                 return file.read()
         except Exception as e:
             self.logger.error(f"Error loading prompt {prompt_file}: {str(e)}")
             raise
 
-    def render_prompt(self, prompt_template: str, variables: Dict[str, Any]) -> str:
+    def render_prompt(self, prompt_template: str, variables: dict[str, Any]) -> str:
         """
         Render a prompt template with variables.
 
@@ -76,7 +75,7 @@ class PromptHandler:
             self.logger.error(f"Error rendering prompt: {str(e)}")
             raise
 
-    def process_prompt(self, prompt_file: str, variables: Dict[str, Any]) -> Dict[str, Any]:
+    def process_prompt(self, prompt_file: str, variables: dict[str, Any]) -> dict[str, Any]:
         """
         Process a prompt with the LLM.
 
@@ -112,7 +111,7 @@ class PromptHandler:
             self.logger.warning("Response is not valid JSON, returning raw text")
             return {"raw_response": response}
 
-    def _extract_json_from_response(self, response: str) -> Optional[str]:
+    def _extract_json_from_response(self, response: str) -> str | None:
         """
         Extract JSON content from markdown code blocks or other formats.
 

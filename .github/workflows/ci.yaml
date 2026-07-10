@@ -9,23 +9,26 @@ on:
 permissions:
   contents: read
 
+env:
+  PYTHON_VERSION: '3.12'
+
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     strategy:
       matrix:
-        python-version: ["3.10", "3.12"]
+        python-version: ["3.10", "${{ env.PYTHON_VERSION }}"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38  # v5.4.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -34,14 +37,14 @@ jobs:
         run: |
           pip install -r requirements.txt -r requirements-dev.txt
 
-      - name: Format check (black)
-        run: black --check .
+      - name: Lint (ruff)
+        run: ruff check .
 
-      - name: Import order (isort)
-        run: isort --check-only --profile black .
+      - name: Format check (ruff)
+        run: ruff format --check .
 
       - name: Type check (mypy)
         run: mypy src/
 
       - name: Tests (pytest)
-        run: python -m pytest tests/unit/ -v
+        run: pytest -q

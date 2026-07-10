@@ -1,6 +1,8 @@
 # BCP Calculator
 
-A tool for calculating Business Complexity Points (BCP) of user stories using LangChain with support for multiple LLM providers (OpenAI GPT-4o-2024-05-13 and Anthropic Claude).
+![CI](https://github.com/danielvm-git/big-counter/actions/workflows/ci.yaml/badge.svg)
+
+A tool for calculating Business Complexity Points (BCP) of user stories using LangChain with support for multiple LLM providers (DeepSeek, OpenAI, Anthropic Claude, and CI&T Flow).
 
 ## Overview
 
@@ -34,12 +36,34 @@ The application orchestrates a flow through 6 predefined prompt steps:
    ```
    cp .env.example .env
    ```
-   
-   Then edit the `.env` file to add your API keys for the providers you want to use (OpenAI and/or Anthropic).
+
+   Then edit `.env` to add your API keys. The default provider is **DeepSeek** — set `DEEPSEEK_API_KEY` at minimum.
 
 ## LLM Providers
 
-The BCP Calculator supports four LLM providers, selected via the `--provider` flag. Each requires its own set of environment variables in your `.env` file.
+The BCP Calculator supports five LLM providers, selected via the `--provider` flag or `BCP_PROVIDER` env var. **Default: `deepseek`.**
+
+---
+
+### DeepSeek (`--provider deepseek`) — default
+
+Connects to the DeepSeek API (OpenAI-compatible) at `api.deepseek.com`.
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `DEEPSEEK_API_KEY` | Yes | — | Your DeepSeek API key |
+| `DEEPSEEK_MODEL_NAME` | No | `deepseek-v4-flash` | Model to use |
+
+**.env example:**
+```env
+BCP_PROVIDER=deepseek
+DEEPSEEK_API_KEY=sk-...
+```
+
+**Usage:**
+```bash
+python run_cli.py story.md
+```
 
 ---
 
@@ -177,7 +201,7 @@ python run_cli.py path/to/user_story.md
 
 - `--log-level`: Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL). Default is INFO.
 - `--output-file`: Path to save the output results. If not provided, results are printed to stdout.
-- `--provider`: LLM provider to use (openai, claude, flow-openai or flow-bedrock). Default is openai.
+- `--provider`: LLM provider to use (deepseek, openai, claude, flow-openai or flow-bedrock). Default is deepseek.
 - `--format`: Output format (text or json). Default is json.
 
 For more detailed CLI usage information, see the [CLI Usage Guide](docs/usage/cli_usage.md).
@@ -261,3 +285,5 @@ The output includes:
 ## License
 
 [MIT License](LICENSE)
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and conventions.

@@ -7,17 +7,17 @@ This module provides a unified interface for different LLM providers.
 import logging
 import os
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterator, List, Optional, Union
+from collections.abc import Iterator
+from typing import Any
 
 import requests
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel, BaseLanguageModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.outputs import ChatGeneration, ChatResult
-from langchain_core.runnables import RunnableLambda
 from langchain_openai import ChatOpenAI
-from pydantic import Field, SecretStr, model_validator
+from pydantic import SecretStr, model_validator
 
 
 class LLMProvider(ABC):
@@ -153,12 +153,12 @@ class FlowChatModel(BaseChatModel):
 
     # Define required fields for this chat model
     base_url: str
-    flow_tenant: Optional[str]
-    flow_agent: Optional[str]
+    flow_tenant: str | None
+    flow_agent: str | None
     model_name: str
     temperature: float
     max_tokens: int
-    api_key: Optional[str]
+    api_key: str | None
 
     class Config:
         """Configuration for this pydantic object."""
@@ -167,7 +167,7 @@ class FlowChatModel(BaseChatModel):
         extra = "forbid"
 
     @model_validator(mode="before")
-    def validate_environment(cls, values: Dict) -> Dict:
+    def validate_environment(cls, values: dict) -> dict:
         """Validate that the environment is properly set up."""
         # Set default values if not provided
         values["model_name"] = values.get("model_name") or "gpt-4o-mini"
@@ -184,7 +184,7 @@ class FlowChatModel(BaseChatModel):
         """Return type of LLM."""
         return "flow"
 
-    def _convert_messages_to_flow_format(self, messages: List[BaseMessage]) -> List[Dict[str, Any]]:
+    def _convert_messages_to_flow_format(self, messages: list[BaseMessage]) -> list[dict[str, Any]]:
         """Convert LangChain messages to Flow API format."""
         flow_messages = []
         for message in messages:
@@ -200,8 +200,8 @@ class FlowChatModel(BaseChatModel):
 
     def _generate(
         self,
-        messages: List[BaseMessage],
-        stop: Optional[List[str]] = None,
+        messages: list[BaseMessage],
+        stop: list[str] | None = None,
         run_manager: Any = None,
         **kwargs: Any,
     ) -> ChatResult:
@@ -264,8 +264,8 @@ class FlowChatModel(BaseChatModel):
 
     def _stream(
         self,
-        messages: List[BaseMessage],
-        stop: Optional[List[str]] = None,
+        messages: list[BaseMessage],
+        stop: list[str] | None = None,
         run_manager: Any = None,
         **kwargs: Any,
     ) -> Iterator[Any]:  # streaming not implemented
@@ -357,16 +357,16 @@ class FlowBedrockChatModel(BaseChatModel):
 
     # Define required fields for this chat model
     base_url: str
-    flow_tenant: Optional[str]
-    flow_agent: Optional[str]
+    flow_tenant: str | None
+    flow_agent: str | None
     model_name: str
     temperature: float
     max_tokens: int
-    api_key: Optional[str]
+    api_key: str | None
     top_p: float
     top_k: int
     anthropic_version: str
-    stop_sequences: List[str]
+    stop_sequences: list[str]
 
     class Config:
         """Configuration for this pydantic object."""
@@ -375,7 +375,7 @@ class FlowBedrockChatModel(BaseChatModel):
         extra = "forbid"
 
     @model_validator(mode="before")
-    def validate_environment(cls, values: Dict) -> Dict:
+    def validate_environment(cls, values: dict) -> dict:
         """Validate that the environment is properly set up."""
         # Set default values if not provided
         values["model_name"] = values.get("model_name") or "anthropic.claude-3-5-haiku"
@@ -395,8 +395,8 @@ class FlowBedrockChatModel(BaseChatModel):
         return "flow_bedrock"
 
     def _convert_messages_to_bedrock_format(
-        self, messages: List[BaseMessage]
-    ) -> List[Dict[str, Any]]:
+        self, messages: list[BaseMessage]
+    ) -> list[dict[str, Any]]:
         """Convert LangChain messages to Bedrock API format."""
         bedrock_messages = []
 
@@ -405,7 +405,9 @@ class FlowBedrockChatModel(BaseChatModel):
                 "role": (
                     "user"
                     if message.type == "human"
-                    else "assistant" if message.type == "ai" else "system"
+                    else "assistant"
+                    if message.type == "ai"
+                    else "system"
                 ),
                 "content": [],
             }
@@ -419,8 +421,8 @@ class FlowBedrockChatModel(BaseChatModel):
 
     def _generate(
         self,
-        messages: List[BaseMessage],
-        stop: Optional[List[str]] = None,
+        messages: list[BaseMessage],
+        stop: list[str] | None = None,
         run_manager: Any = None,
         **kwargs: Any,
     ) -> ChatResult:
@@ -496,8 +498,8 @@ class FlowBedrockChatModel(BaseChatModel):
 
     def _stream(
         self,
-        messages: List[BaseMessage],
-        stop: Optional[List[str]] = None,
+        messages: list[BaseMessage],
+        stop: list[str] | None = None,
         run_manager: Any = None,
         **kwargs: Any,
     ) -> Iterator[Any]:  # streaming not implemented
@@ -599,7 +601,8 @@ def get_provider(provider_name: str, logger: logging.Logger) -> LLMProvider:
     Get the LLM provider based on the provider name.
 
     Args:
-        provider_name: The name of the provider ('deepseek', 'openai', 'claude', 'flow-openai', or 'flow-bedrock')
+        provider_name: The provider name
+            ('deepseek', 'openai', 'claude', 'flow-openai', or 'flow-bedrock')
         logger: The logger instance
 
     Returns:

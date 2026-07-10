@@ -14,7 +14,7 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -60,7 +60,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def process_story(story_path: str, provider: str, logger: logging.Logger) -> Dict[str, Any]:
+def process_story(story_path: str, provider: str, logger: logging.Logger) -> dict[str, Any]:
     """
     Process a single story with the specified provider.
 
@@ -76,7 +76,7 @@ def process_story(story_path: str, provider: str, logger: logging.Logger) -> Dic
 
     try:
         # Read story content
-        with open(story_path, "r", encoding="utf-8") as file:
+        with open(story_path, encoding="utf-8") as file:
             story_content = file.read()
 
         # Initialize calculator with provider
@@ -92,9 +92,8 @@ def process_story(story_path: str, provider: str, logger: logging.Logger) -> Dic
         results["provider"] = provider
         results["story_file"] = os.path.basename(story_path)
 
-        logger.info(
-            f"Completed {os.path.basename(story_path)} with {provider} in {end_time - start_time:.2f} seconds"
-        )
+        elapsed = end_time - start_time
+        logger.info(f"Completed {os.path.basename(story_path)} with {provider} in {elapsed:.2f}s")
         return results
 
     except Exception as e:
@@ -108,7 +107,7 @@ def process_story(story_path: str, provider: str, logger: logging.Logger) -> Dic
 
 
 def generate_comparison(
-    results: List[Dict[str, Any]], output_dir: str, output_format: str, logger: logging.Logger
+    results: list[dict[str, Any]], output_dir: str, output_format: str, logger: logging.Logger
 ):
     """
     Generate a comparison report from the results.

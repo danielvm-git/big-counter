@@ -2,7 +2,7 @@
 Pydantic models for the BCP Calculator API.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -21,7 +21,7 @@ class JobStatus(BaseModel):
     status: str = Field(
         ..., description="Current status of the job (pending, processing, completed, failed)"
     )
-    result: Optional[Dict[str, Any]] = Field(
+    result: dict[str, Any] | None = Field(
         None, description="Results of the BCP calculation if completed"
     )
-    error: Optional[str] = Field(None, description="Error message if job failed")
+    error: str | None = Field(None, description="Error message if job failed")

@@ -1,4 +1,3 @@
-from bcp.logger import setup_logger
 from src.main import format_results_json, format_results_text
 
 

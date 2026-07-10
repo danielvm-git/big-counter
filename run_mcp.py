@@ -1,8 +1,5 @@
 import logging
-import uuid
-from typing import Any
 
-import httpx
 from mcp.server.fastmcp import FastMCP
 
 from src.bcp.bcp_calculator import BCPCalculator
@@ -30,5 +27,5 @@ async def calculate_bcp(story_content: str, provider: str = "deepseek") -> dict:
 
 
 if __name__ == "__main__":
-    logger.info(f"MCP Server starting...")
+    logger.info("MCP Server starting...")
     mcp.run(transport="stdio")

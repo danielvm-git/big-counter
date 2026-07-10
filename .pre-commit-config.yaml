@@ -1,16 +1,10 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 25.1.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 25a8c8da6c24a3b9a1a536e2674683dd0eead5d6  # v0.11.2
     hooks:
-      - id: black
-        language_version: python3
-        args: [--check]
-
-  - repo: https://github.com/pycqa/isort
-    rev: 6.0.1
-    hooks:
-      - id: isort
-        args: [--check-only, --profile, black]
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
 
   - repo: local
     hooks:
