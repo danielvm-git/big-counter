@@ -2,7 +2,8 @@
 """
 BCP Calculator - Standalone MCP HTTP Server
 
-Runs the MCP server using Streamable HTTP transport without changing existing API capabilities.
+Runs the MCP server using Streamable HTTP transport.
+Exposes create_mcp_server() for BigBase deployment via app.py.
 """
 
 import argparse
@@ -14,6 +15,8 @@ from mcp.server.fastmcp import FastMCP
 
 from src.bcp.bcp_calculator import BCPCalculator
 from src.bcp.logger import setup_logger
+
+logger = setup_logger(logging.INFO)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -39,71 +42,73 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
-    load_dotenv()
-    args = parse_arguments()
+def _apply_provider_overrides(
+    provider: str | None,
+    api_key: str | None = None,
+    model_name: str | None = None,
+    flow_client_id: str | None = None,
+    flow_client_secret: str | None = None,
+    flow_base_url: str | None = None,
+    flow_tenant: str | None = None,
+    flow_agent: str | None = None,
+) -> None:
+    """Apply provider-related overrides by setting environment variables."""
+    p = (provider or os.environ.get("BCP_PROVIDER") or "deepseek").lower()
+    if p == "deepseek":
+        if api_key:
+            os.environ["DEEPSEEK_API_KEY"] = api_key
+        if model_name:
+            os.environ["DEEPSEEK_MODEL_NAME"] = model_name
+    elif p == "openai":
+        if api_key:
+            os.environ["OPENAI_API_KEY"] = api_key
+        if model_name:
+            os.environ["OPENAI_MODEL_NAME"] = model_name
+    elif p == "claude":
+        if api_key:
+            os.environ["ANTHROPIC_API_KEY"] = api_key
+        if model_name:
+            os.environ["ANTHROPIC_MODEL_NAME"] = model_name
+    elif p in ("flow-openai", "flow"):
+        if flow_client_id:
+            os.environ["FLOW_CLIENT_ID"] = flow_client_id
+        if flow_client_secret:
+            os.environ["FLOW_CLIENT_SECRET"] = flow_client_secret
+        if flow_base_url:
+            os.environ["FLOW_BASE_URL"] = flow_base_url
+        if flow_tenant:
+            os.environ["FLOW_TENANT"] = flow_tenant
+        if flow_agent:
+            os.environ["FLOW_AGENT"] = flow_agent
+        if model_name:
+            os.environ["FLOW_MODEL_NAME"] = model_name
+    elif p == "flow-bedrock":
+        if flow_client_id:
+            os.environ["FLOW_CLIENT_ID"] = flow_client_id
+        if flow_client_secret:
+            os.environ["FLOW_CLIENT_SECRET"] = flow_client_secret
+        if flow_base_url:
+            os.environ["FLOW_BASE_URL"] = flow_base_url
+        if flow_tenant:
+            os.environ["FLOW_TENANT"] = flow_tenant
+        if flow_agent:
+            os.environ["FLOW_AGENT"] = flow_agent
+        if model_name:
+            os.environ["FLOW_BEDROCK_MODEL_NAME"] = model_name
 
-    logger = setup_logger(logging.INFO)
-    logger.info(f"Starting MCP HTTP Server on {args.host}:{args.port}")
-    logger.info(f"Allowed origins: {args.allowed_origins}")
 
-    # Configure server bind settings via FastMCP constructor arguments
+def create_mcp_server(host: str = "0.0.0.0", port: int = 51617) -> FastMCP:
+    """Create and configure the BCP Calculator MCP server.
+
+    Returns a FastMCP instance ready to run. Call mcp.run(transport="streamable-http")
+    to start serving.
+    """
     mcp = FastMCP(
         "bcp-calculator-mcp",
-        host=args.host,
-        port=args.port,
+        host=host,
+        port=port,
         streamable_http_path="/mcp",
     )
-
-    def apply_provider_overrides(
-        provider: str | None,
-        api_key: str | None = None,
-        model_name: str | None = None,
-        flow_client_id: str | None = None,
-        flow_client_secret: str | None = None,
-        flow_base_url: str | None = None,
-        flow_tenant: str | None = None,
-        flow_agent: str | None = None,
-    ) -> None:
-        """Apply provider-related overrides by setting environment variables."""
-        p = (provider or os.environ.get("BCP_PROVIDER") or "openai").lower()
-        if p == "openai":
-            if api_key:
-                os.environ["OPENAI_API_KEY"] = api_key
-            if model_name:
-                os.environ["OPENAI_MODEL_NAME"] = model_name
-        elif p == "claude":
-            if api_key:
-                os.environ["ANTHROPIC_API_KEY"] = api_key
-            if model_name:
-                os.environ["ANTHROPIC_MODEL_NAME"] = model_name
-        elif p in ("flow-openai", "flow"):
-            if flow_client_id:
-                os.environ["FLOW_CLIENT_ID"] = flow_client_id
-            if flow_client_secret:
-                os.environ["FLOW_CLIENT_SECRET"] = flow_client_secret
-            if flow_base_url:
-                os.environ["FLOW_BASE_URL"] = flow_base_url
-            if flow_tenant:
-                os.environ["FLOW_TENANT"] = flow_tenant
-            if flow_agent:
-                os.environ["FLOW_AGENT"] = flow_agent
-            if model_name:
-                os.environ["FLOW_MODEL_NAME"] = model_name
-        elif p == "flow-bedrock":
-            if flow_client_id:
-                os.environ["FLOW_CLIENT_ID"] = flow_client_id
-            if flow_client_secret:
-                os.environ["FLOW_CLIENT_SECRET"] = flow_client_secret
-            if flow_base_url:
-                os.environ["FLOW_BASE_URL"] = flow_base_url
-            if flow_tenant:
-                os.environ["FLOW_TENANT"] = flow_tenant
-            if flow_agent:
-                os.environ["FLOW_AGENT"] = flow_agent
-            if model_name:
-                os.environ["FLOW_BEDROCK_MODEL_NAME"] = model_name
-        # No else: unsupported provider handled downstream by BCPCalculator
 
     @mcp.tool()
     async def calculate_bcp(
@@ -118,13 +123,14 @@ def main() -> None:
         flow_agent: str | None = None,
     ) -> dict:
         """Calculate BCP via MCP tool.
-        - provider: optional. If not provided, defaults to env BCP_PROVIDER or 'openai'.
-        - api_key: optional provider API key override (OPENAI_API_KEY or ANTHROPIC_API_KEY).
+
+        - provider: optional. If not provided, defaults to env BCP_PROVIDER or 'deepseek'.
+        - api_key: optional provider API key override.
         - model_name: optional model name override for the selected provider.
         - flow_*: optional Flow overrides if provider is flow-openai or flow-bedrock.
         """
-        effective_provider = (provider or os.environ.get("BCP_PROVIDER") or "openai").lower()
-        apply_provider_overrides(
+        effective_provider = (provider or os.environ.get("BCP_PROVIDER") or "deepseek").lower()
+        _apply_provider_overrides(
             effective_provider,
             api_key,
             model_name,
@@ -138,7 +144,17 @@ def main() -> None:
         result = calculator.calculate_bcp(story_content)
         return {"result": result}
 
-    # Run using streamable HTTP transport
+    return mcp
+
+
+def main() -> None:
+    load_dotenv()
+    args = parse_arguments()
+
+    logger.info(f"Starting MCP HTTP Server on {args.host}:{args.port}")
+    logger.info(f"Allowed origins: {args.allowed_origins}")
+
+    mcp = create_mcp_server(host=args.host, port=args.port)
     mcp.run(transport="streamable-http")
 
 
