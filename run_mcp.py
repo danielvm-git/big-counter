@@ -15,7 +15,7 @@ logger = setup_logger(logging.INFO)
 
 
 @mcp.tool()
-async def calculate_bcp(story_content: str, provider: str = "openai") -> dict:
+async def calculate_bcp(story_content: str, provider: str = "deepseek") -> dict:
     """Calculate BCP.
 
     Args:

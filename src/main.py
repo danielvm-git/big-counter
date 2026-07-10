@@ -44,9 +44,9 @@ def parse_arguments():
     parser.add_argument(
         "--provider",
         type=str,
-        choices=["openai", "claude", "flow-openai", "flow-bedrock"],
-        default="openai",
-        help="LLM provider to use (default: openai)",
+        choices=["deepseek", "openai", "claude", "flow-openai", "flow-bedrock"],
+        default="deepseek",
+        help="LLM provider to use (default: deepseek)",
     )
     return parser.parse_args()
 

@@ -18,13 +18,13 @@ from bcp import BCPCalculator, setup_logger
 class BCPClient:
     """Python SDK for the BCP Calculator."""
 
-    def __init__(self, log_level: str = "INFO", provider: str = "openai"):
+    def __init__(self, log_level: str = "INFO", provider: str = "deepseek"):
         """
         Initialize the BCP client.
 
         Args:
             log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-            provider: LLM provider to use (openai or claude)
+            provider: LLM provider to use (deepseek, openai, or claude)
         """
         # Load environment variables if not already loaded
         load_dotenv()

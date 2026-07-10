@@ -17,7 +17,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.outputs import ChatGeneration, ChatResult
 from langchain_core.runnables import RunnableLambda
 from langchain_openai import ChatOpenAI
-from pydantic import Field, model_validator
+from pydantic import Field, SecretStr, model_validator
 
 
 class LLMProvider(ABC):
@@ -86,6 +86,32 @@ class OpenAIProvider(LLMProvider):
             The OpenAI model
         """
         return ChatOpenAI(model=self.model_name, temperature=self.temperature)
+
+
+class DeepSeekProvider(LLMProvider):
+    """DeepSeek provider — OpenAI-compatible API at api.deepseek.com."""
+
+    def __init__(
+        self,
+        logger: logging.Logger,
+        model_name: str = "deepseek-v4-flash",
+        temperature: float = 0,
+    ):
+        super().__init__(logger)
+        self.model_name = model_name
+        self.api_key = os.environ.get("DEEPSEEK_API_KEY")
+        self.base_url = "https://api.deepseek.com"
+        self.temperature = temperature
+        self.logger.info(f"Initialized DeepSeek provider with model {model_name}")
+
+    def get_model(self) -> BaseLanguageModel:
+        api_key = SecretStr(self.api_key) if self.api_key else None
+        return ChatOpenAI(
+            model=self.model_name,
+            temperature=self.temperature,
+            api_key=api_key,
+            base_url=self.base_url,
+        )
 
 
 class ClaudeProvider(LLMProvider):
@@ -573,7 +599,7 @@ def get_provider(provider_name: str, logger: logging.Logger) -> LLMProvider:
     Get the LLM provider based on the provider name.
 
     Args:
-        provider_name: The name of the provider ('openai', 'claude', 'flow', or 'flow-bedrock')
+        provider_name: The name of the provider ('deepseek', 'openai', 'claude', 'flow-openai', or 'flow-bedrock')
         logger: The logger instance
 
     Returns:
@@ -584,7 +610,10 @@ def get_provider(provider_name: str, logger: logging.Logger) -> LLMProvider:
     """
     provider_name = provider_name.lower()
 
-    if provider_name == "openai":
+    if provider_name == "deepseek":
+        model_name = os.environ.get("DEEPSEEK_MODEL_NAME", "deepseek-v4-flash")
+        return DeepSeekProvider(logger, model_name=model_name)
+    elif provider_name == "openai":
         model_name = os.environ.get("OPENAI_MODEL_NAME", "gpt-4o-2024-05-13")
         return OpenAIProvider(logger, model_name=model_name)
     elif provider_name == "claude":
