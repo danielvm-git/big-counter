@@ -1,3 +1,9 @@
+# Python pre-commit configuration
+# Install: pre-commit install
+# Run manually: pre-commit run --all-files
+#
+# Run `pre-commit autoupdate` periodically to pin hooks to latest SHAs.
+
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: 25a8c8da6c24a3b9a1a536e2674683dd0eead5d6  # v0.11.2
@@ -5,6 +11,16 @@ repos:
       - id: ruff
         args: [--fix]
       - id: ruff-format
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        exclude: ^\.github/ISSUE_TEMPLATE/
+      - id: check-toml
+      - id: check-added-large-files
 
   - repo: local
     hooks:

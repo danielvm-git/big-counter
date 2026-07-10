@@ -199,7 +199,7 @@ print(f"Job ID: {job_id}")
 while True:
     response = requests.get(f"{base_url}/status/{job_id}")
     status_data = response.json()
-    
+
     if status_data["status"] == "completed":
         print("BCP calculation completed!")
         result = status_data["result"]

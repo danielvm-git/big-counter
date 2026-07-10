@@ -1,10 +1,10 @@
 [run]
 branch = True
-source = 
+source =
     src
 
 [report]
-omit = 
+omit =
     src/bcp/llm_providers.py
     */tests/*
 show_missing = True

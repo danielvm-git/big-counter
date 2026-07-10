@@ -39,6 +39,18 @@ The application orchestrates a flow through 6 predefined prompt steps:
 
    Then edit `.env` to add your API keys. The default provider is **DeepSeek** — set `DEEPSEEK_API_KEY` at minimum.
 
+## Development
+
+| Action | Command |
+|--------|--------|
+| Run CLI | `python run_cli.py <story.md>` |
+| Run API | `python run_api_server.py` |
+| Run MCP | `python run_mcp.py` |
+| Test | `python -m pytest` |
+| Lint | `ruff check . && ruff format --check .` |
+| Type check | `mypy src/` |
+| Preflight | `ruff check . && ruff format --check . && mypy src/ && pytest -q` |
+
 ## LLM Providers
 
 The BCP Calculator supports five LLM providers, selected via the `--provider` flag or `BCP_PROVIDER` env var. **Default: `deepseek`.**
