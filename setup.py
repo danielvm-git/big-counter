@@ -8,7 +8,7 @@ from setuptools import find_packages, setup
 with open("README.md", encoding="utf-8") as f:
     long_description = f.read()
 
-version = "1.1.1"
+version = "1.1.2"
 
 setup(
     name="bcp-calculator",

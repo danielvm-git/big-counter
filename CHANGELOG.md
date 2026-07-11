@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.1.2 (2026-07-11)
+
+### Bug Fixes
+
+- **ci**: Remove env interpolation from matrix — not available in strategy context
+  ([`6b1f80c`](https://github.com/danielvm-git/big-counter/commit/6b1f80c5e84d5e6754f097b329a975758dc57910))
+
+### Chores
+
+- Trigger CI re-run after webhook race condition
+  ([`4309982`](https://github.com/danielvm-git/big-counter/commit/43099827cf6363468c7fce5be035d2be4a3fff65))
+
+
 ## v1.1.1 (2026-07-11)
 
 ### Bug Fixes
