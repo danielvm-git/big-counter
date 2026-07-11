@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.1.1 (2026-07-11)
+
+### Bug Fixes
+
+- **ci**: Use @v3 tag for codeql-action instead of guessed SHA
+  ([`1a33774`](https://github.com/danielvm-git/big-counter/commit/1a33774c89cc42f587402b61890846d114af17ba))
+
+### Chores
+
+- Close remaining .github portfolio gaps
+  ([`5c1a2d5`](https://github.com/danielvm-git/big-counter/commit/5c1a2d56a1156c399a1f025e58e51fef59fbc3c8))
+
+
 ## v1.1.0 (2026-07-10)
 
 ### Code Style
